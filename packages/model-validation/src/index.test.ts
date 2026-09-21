@@ -70,6 +70,60 @@ describe("validateModel", () => {
     ).resolves.toMatchObject({ valid: true })
   })
 
+  it("rejects an artifact whose file name differs from the manifest", async () => {
+    const { manifestPath, artifactPath } = await createFixture()
+    await mutateManifest(manifestPath, (manifest) => {
+      manifest.artifact.fileName = "other-artifact.glb"
+    })
+
+    const report = await validateModel(manifestPath, artifactPath)
+
+    expect(report).toEqual({
+      valid: false,
+      errors: ["Artifact file name does not match the supplied artifact path."],
+    })
+  })
+
+  it.each([
+    [
+      "invalid magic",
+      "Artifact is not a GLB file.",
+      (contents: Buffer) => contents.writeUInt32LE(0, 0),
+    ],
+    [
+      "unsupported version",
+      "GLB must use version 2.",
+      (contents: Buffer) => contents.writeUInt32LE(1, 4),
+    ],
+    [
+      "mismatched declared length",
+      "GLB header length does not match artifact length.",
+      (contents: Buffer) => contents.writeUInt32LE(contents.length + 4, 8),
+    ],
+    [
+      "missing JSON chunk marker",
+      "GLB is missing its JSON chunk.",
+      (contents: Buffer) => contents.writeUInt32LE(0, 16),
+    ],
+    [
+      "out-of-bounds JSON chunk",
+      "GLB JSON chunk exceeds artifact bounds.",
+      (contents: Buffer) => contents.writeUInt32LE(contents.length, 12),
+    ],
+  ])("rejects GLB with %s", async (_name, expectedError, mutateArtifact) => {
+    const { manifestPath, artifactPath } = await createFixture()
+    const artifactContents = await readFile(artifactPath)
+    mutateArtifact(artifactContents)
+    await writeFile(artifactPath, artifactContents)
+
+    const report = await validateModel(manifestPath, artifactPath)
+
+    expect(report).toMatchObject({ valid: false })
+    if (!report.valid) {
+      expect(report.errors).toContain(expectedError)
+    }
+  })
+
   it("rejects fingerprint mismatch, duplicate identities, and missing GLB nodes", async () => {
     const { manifestPath, artifactPath } = await createFixture()
     await mutateManifest(manifestPath, (manifest) => {
