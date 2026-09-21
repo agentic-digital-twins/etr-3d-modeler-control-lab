@@ -1,0 +1,23 @@
+{
+  "name": "etr-3d-modeler-control-lab",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@10.33.0",
+  "scripts": {
+    "check": "pnpm run check:architecture && pnpm typecheck && pnpm test:unit && pnpm test:integration",
+    "check:architecture": "pnpm --filter @etr/repository-architecture validate",
+    "validate:model": "pnpm --filter @etr/model-validation validate",
+    "typecheck": "turbo typecheck",
+    "test": "turbo test",
+    "test:unit": "pnpm --filter @etr/repository-architecture test && pnpm --filter @etr/equipment-model-contracts test && pnpm --filter @etr/model-validation test && pnpm --filter @etr/equipment-viewer test",
+    "test:integration": "pnpm --filter @etr/model-api test",
+    "test:e2e": "playwright test",
+    "dev:api": "pnpm --filter @etr/model-api dev",
+    "dev:viewer": "pnpm --filter @etr/equipment-viewer dev"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.55.0",
+    "turbo": "^2.6.3",
+    "typescript": "^5.9.2"
+  }
+}

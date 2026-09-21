@@ -1,0 +1,22 @@
+{
+  "name": "@etr/model-validation",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "validate": "tsx src/cli.ts ../../fixtures/equipment-models/dd-8v92ta-cylinder.manifest.json ../../fixtures/equipment-models/dd-8v92ta-cylinder.glb",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "node --test --import tsx"
+  },
+  "dependencies": {
+    "@etr/equipment-model-contracts": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^24.3.0",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.2"
+  }
+}
