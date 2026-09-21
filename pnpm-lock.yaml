@@ -11,12 +11,6 @@ importers:
       '@playwright/test':
         specifier: ^1.55.0
         version: 1.63.0
-      '@types/pngjs':
-        specifier: ^6.0.5
-        version: 6.0.5
-      pngjs:
-        specifier: ^7.0.0
-        version: 7.0.0
       turbo:
         specifier: ^2.6.3
         version: 2.11.2
@@ -135,6 +129,9 @@ importers:
       typescript:
         specifier: ^5.9.2
         version: 5.9.3
+      vitest:
+        specifier: ^3.2.4
+        version: 3.2.7(@types/node@24.13.6)(jsdom@26.1.0)(tsx@4.23.15)(yaml@2.9.1)
 
   packages/repository-architecture:
     dependencies:
@@ -760,9 +757,6 @@ packages:
   '@types/offscreencanvas@2019.7.3':
     resolution: {integrity: sha512-ieXiYmgSRXUDeOntE1InxjWyvEelZGP63M+cGuquuRLuIKKT1osnkXjxev9B7d1nXSug5vpunx+gNlbVxMlC9A==}
 
-  '@types/pngjs@6.0.5':
-    resolution: {integrity: sha512-0k5eKfrA83JOZPppLtS2C7OUtyNAl2wKNxfyYl9Q5g9lPkgBl/9hNyAu6HuEH2J4XmIv2znEpkDd0SaZVxW6iQ==}
-
   '@types/qs@6.15.1':
     resolution: {integrity: sha512-GZHUBZR9hckSUhrxmp1nG6NwdpM9fCunJwyThLW1X3AyHgd9IlHb6VANpQQqDr2o/qQp6McZ3y/IA2rVzKzSbw==}
 
@@ -1387,10 +1381,6 @@ packages:
     resolution: {integrity: sha512-+7ziBLidS4NaNCdt57SUDT+wYmmd5fmiQejUic/kb+YsYSCPyOOE9sebzMjNmQrsnNpDJqd4WHvV/8lfKfUDUg==}
     engines: {node: '>=20'}
     hasBin: true
-
-  pngjs@7.0.0:
-    resolution: {integrity: sha512-LKWqWJRhstyYo9pGvgor/ivk2w94eSjE3RGVuzLGlr3NmD8bf7RcYGze1mNdEHRP6TRP6rMuDHk5t44hnTRyow==}
-    engines: {node: '>=14.19.0'}
 
   postcss@8.5.28:
     resolution: {integrity: sha512-RRuzqDtt5Y9h3quz5hWhK+TPnsmVs6WwSU6LkJMeY4HstUEDuYTG8UJSdawMRzmzAtV+KEoG8N3Qg2qLy5vM/A==}
@@ -2356,10 +2346,6 @@ snapshots:
 
   '@types/offscreencanvas@2019.7.3': {}
 
-  '@types/pngjs@6.0.5':
-    dependencies:
-      '@types/node': 24.13.6
-
   '@types/qs@6.15.1': {}
 
   '@types/range-parser@1.2.7': {}
@@ -3002,8 +2988,6 @@ snapshots:
   playwright@1.63.0:
     dependencies:
       playwright-core: 1.63.0
-
-  pngjs@7.0.0: {}
 
   postcss@8.5.28:
     dependencies:

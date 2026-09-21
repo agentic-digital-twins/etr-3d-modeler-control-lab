@@ -15,15 +15,15 @@ type VisibilityMode = "all" | "isolated"
 
 function Model({
   manifest,
-  selectedNodeName,
+  selectedComponentId,
   visibilityMode,
   onSelect,
   onReady,
 }: {
   manifest: EquipmentModelManifest
-  selectedNodeName?: string
+  selectedComponentId?: string
   visibilityMode: VisibilityMode
-  onSelect: (nodeName: string) => void
+  onSelect: (componentId: string) => void
   onReady: () => void
 }) {
   const { scene } = useGLTF(
@@ -32,9 +32,14 @@ function Model({
 
   useEffect(() => {
     scene.traverse((node: Object3D) => {
-      node.visible = visibilityMode === "all" || node.name === selectedNodeName
+      const component = manifest.components.find(
+        (candidate) => candidate.glbNodeName === node.name,
+      )
+      node.visible =
+        visibilityMode === "all" ||
+        component?.componentId === selectedComponentId
     })
-  }, [scene, selectedNodeName, visibilityMode])
+  }, [manifest.components, scene, selectedComponentId, visibilityMode])
 
   useEffect(() => {
     onReady()
@@ -45,7 +50,12 @@ function Model({
       object={scene}
       onClick={(event: ThreeEvent<MouseEvent>) => {
         event.stopPropagation()
-        onSelect(event.object.name)
+        const component = manifest.components.find(
+          (candidate) => candidate.glbNodeName === event.object.name,
+        )
+        if (component) {
+          onSelect(component.componentId)
+        }
       }}
     />
   )
@@ -53,7 +63,7 @@ function Model({
 
 export function App() {
   const [manifest, setManifest] = useState<EquipmentModelManifest>()
-  const [selectedNodeName, setSelectedNodeName] = useState<string>()
+  const [selectedComponentId, setSelectedComponentId] = useState<string>()
   const [visibilityMode, setVisibilityMode] = useState<VisibilityMode>("all")
   const [isArtifactReady, setIsArtifactReady] = useState(false)
   const [error, setError] = useState<string>()
@@ -87,7 +97,7 @@ export function App() {
   }, [])
 
   const selectedComponent = manifest?.components.find(
-    (component) => component.glbNodeName === selectedNodeName,
+    (component) => component.componentId === selectedComponentId,
   )
 
   if (error) {
@@ -132,10 +142,10 @@ export function App() {
             <Suspense fallback={null}>
               <Model
                 manifest={manifest}
-                selectedNodeName={selectedNodeName}
+                selectedComponentId={selectedComponentId}
                 visibilityMode={visibilityMode}
-                onSelect={(nodeName) => {
-                  setSelectedNodeName(nodeName)
+                onSelect={(componentId) => {
+                  setSelectedComponentId(componentId)
                   setVisibilityMode("all")
                 }}
                 onReady={() => setIsArtifactReady(true)}
@@ -152,11 +162,13 @@ export function App() {
             {manifest.components.map((component) => (
               <button
                 className={
-                  component.glbNodeName === selectedNodeName ? "selected" : ""
+                  component.componentId === selectedComponentId
+                    ? "selected"
+                    : ""
                 }
                 key={component.componentId}
                 onClick={() => {
-                  setSelectedNodeName(component.glbNodeName)
+                  setSelectedComponentId(component.componentId)
                   setVisibilityMode("all")
                 }}
               >
@@ -169,7 +181,7 @@ export function App() {
           <h2>View</h2>
           <div className="command-row">
             <button
-              disabled={!selectedNodeName}
+              disabled={!selectedComponentId}
               onClick={() => setVisibilityMode("isolated")}
             >
               Isolate
@@ -177,7 +189,7 @@ export function App() {
             <button onClick={() => setVisibilityMode("all")}>Show all</button>
             <button
               onClick={() => {
-                setSelectedNodeName(undefined)
+                setSelectedComponentId(undefined)
                 setVisibilityMode("all")
               }}
             >
