@@ -12,6 +12,8 @@ A GLB is an immutable exported geometry artifact identified by `artifactId`, `ar
 
 The canonical `EquipmentModelManifest` identifies the model, semantic components, coordinate frame, units, provenance, lifecycle timestamps, and each component's GLB node name. It is owned by `@etr/equipment-model-contracts`.
 
+Phase A binds each semantic component to exactly one GLB node through `glbNodeName`. This is a fixture-scale simplification, not permanent doctrine: a future contract may bind one semantic component to one or more spatial representation nodes or subtrees. `componentId` remains the durable identity; GLB node names are representation adapters.
+
 `generator` provenance answers what produced the artifact. `sourceReferences` answers which engineering evidence informed its representation.
 
 ## Validator

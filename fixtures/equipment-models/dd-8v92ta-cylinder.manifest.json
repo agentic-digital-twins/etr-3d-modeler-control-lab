@@ -1,0 +1,49 @@
+{
+  "modelId": "detroit-diesel-8v92ta-cylinder-prototype",
+  "modelKind": "detroit-diesel-8v92ta-cylinder-assembly",
+  "modelVersion": "0.1.0",
+  "subjectId": "equipment-model:detroit-diesel-8v92ta-cylinder-prototype",
+  "subjectKind": "equipment-model",
+  "artifact": {
+    "artifactId": "detroit-diesel-8v92ta-cylinder-prototype-fixture",
+    "artifactVersion": "0.1.0",
+    "fileName": "dd-8v92ta-cylinder.glb",
+    "contentFingerprint": "sha256:46bb836065be430ba5caf1d70ff06f7504f7714ed724b04e87de8df65d8b055e"
+  },
+  "generator": {
+    "name": "phase-a-fixture-generator",
+    "version": "0.1.0",
+    "sourceRevision": "phase-a-slice-1"
+  },
+  "sourceReferences": [],
+  "coordinateFrame": "right-handed-y-up",
+  "units": "meters",
+  "createdAt": "2026-09-21T00:00:00.000Z",
+  "generatedAt": "2026-09-21T00:00:00.000Z",
+  "exportedAt": "2026-09-21T00:00:00.000Z",
+  "validatedAt": "2026-09-21T00:00:00.000Z",
+  "components": [
+    {
+      "componentId": "cylinder.l1",
+      "componentKind": "cylinder-assembly",
+      "semanticRole": "cylinder",
+      "displayName": "Cylinder L1",
+      "glbNodeName": "Cylinder_L1",
+      "capabilities": ["selectable", "highlightable", "isolatable"]
+    },
+    {
+      "componentId": "piston.l1",
+      "componentKind": "piston",
+      "semanticRole": "reciprocating-element",
+      "displayName": "Piston L1",
+      "parentComponentId": "cylinder.l1",
+      "glbNodeName": "Piston_L1",
+      "capabilities": [
+        "selectable",
+        "highlightable",
+        "isolatable",
+        "animatable"
+      ]
+    }
+  ]
+}

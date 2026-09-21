@@ -1,0 +1,127 @@
+:root {
+  font-family: Georgia, "Times New Roman", serif;
+  color: #16332e;
+  background: #f4f1e7;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  min-width: 320px;
+}
+button {
+  border: 1px solid #7f918c;
+  background: #f8f6ef;
+  color: #16332e;
+  cursor: pointer;
+  font: inherit;
+  padding: 0.55rem 0.7rem;
+}
+button:hover:not(:disabled),
+button.selected {
+  background: #d76d3e;
+  border-color: #a54825;
+  color: #fff;
+}
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+.workbench {
+  display: grid;
+  min-height: 100vh;
+  grid-template-columns: minmax(0, 1fr) 20rem;
+  grid-template-rows: auto 1fr;
+}
+header {
+  align-items: end;
+  background: #173b35;
+  color: #f7f0df;
+  display: flex;
+  grid-column: 1 / -1;
+  justify-content: space-between;
+  padding: 1.1rem 1.5rem;
+}
+h1,
+h2,
+p {
+  margin: 0;
+}
+h1 {
+  font-size: 1.35rem;
+  font-weight: 500;
+}
+h2 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.7rem;
+}
+.eyebrow {
+  color: #f4b763;
+  font-family: ui-monospace, monospace;
+  font-size: 0.75rem;
+  margin-bottom: 0.25rem;
+  text-transform: uppercase;
+}
+.artifact {
+  color: #c4d6cf;
+  font-family: ui-monospace, monospace;
+  font-size: 0.75rem;
+}
+.canvas-shell {
+  min-height: 0;
+}
+.controls {
+  background: #e7e4d8;
+  border-left: 1px solid #aebbb4;
+  display: grid;
+  gap: 1.25rem;
+  padding: 1.25rem;
+}
+.component-list,
+.command-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.details {
+  border-top: 1px solid #aebbb4;
+  padding-top: 1.25rem;
+}
+dl {
+  display: grid;
+  gap: 0.25rem;
+  margin: 0;
+}
+dt {
+  color: #637570;
+  font-family: ui-monospace, monospace;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+}
+dd {
+  margin: 0 0 0.65rem;
+}
+.state-panel {
+  display: grid;
+  gap: 0.75rem;
+  min-height: 100vh;
+  place-content: center;
+  padding: 2rem;
+}
+@media (max-width: 760px) {
+  .workbench {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto minmax(22rem, 55vh) auto;
+  }
+  .controls {
+    border-left: 0;
+    border-top: 1px solid #aebbb4;
+  }
+  header {
+    align-items: start;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+}
