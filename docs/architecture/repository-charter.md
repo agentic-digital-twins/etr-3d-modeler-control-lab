@@ -57,6 +57,8 @@ The local catalog API and browser server are separate operational surfaces. The 
 
 Root `.env` is for local/manual process configuration. App-local `.env` files contain only browser-build variables and must not contain NUC topology or secrets. Installed NUC services use a dedicated, machine-local environment file referenced by the systemd user unit; the checked-in `config/deploy` template and installer are the deployment source of truth. Every required NUC setting must be installed, verified in the unit, and confirmed in the live process after restart.
 
+The normal NUC path is a static viewer build served by the production modeler host, never a Vite dev/watch/HMR server. The canonical NUC checkout path is `~/repos/etr-3d-modeler-control-lab`; the systemd template intentionally declares that path rather than inferring an arbitrary checkout.
+
 Port allocation and launch procedures are maintained in [api-local-browser-env-port-operational-map.md](api-local-browser-env-port-operational-map.md).
 
 Making the design-time workbench available on the NUC does not promote the Model API into authoritative ETR runtime infrastructure.
