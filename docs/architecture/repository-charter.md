@@ -55,6 +55,8 @@ Promotion from this lab requires a proven shared consumer or runtime requirement
 
 The local catalog API and browser server are separate operational surfaces. The browser makes relative `/api` requests; its server-side proxy owns the API upstream address so remote NUC browsers never receive `localhost` as an API target.
 
+Browser routes declare their upstream owner. This lab's `/api/*` boundary proxies to its configured Model API upstream. A future Twin Crew-integrated browser must preserve Twin Crew's distinct same-origin shapes: `/_etr/api/*` reaches the ETR API, while `/_etr/runtime/*` reaches the selected domain runtime. These route families are intentionally not interchangeable and browser code must not target either upstream directly.
+
 Root `.env` is for local/manual process configuration. App-local `.env` files contain only browser-build variables and must not contain NUC topology or secrets. Installed NUC services use a dedicated, machine-local environment file referenced by the systemd user unit; the checked-in `config/deploy` template and installer are the deployment source of truth. Every required NUC setting must be installed, verified in the unit, and confirmed in the live process after restart.
 
 The normal NUC path is a static viewer build served by the production modeler host, never a Vite dev/watch/HMR server. The canonical NUC checkout path is `~/repos/etr-3d-modeler-control-lab`; the systemd template intentionally declares that path rather than inferring an arbitrary checkout.

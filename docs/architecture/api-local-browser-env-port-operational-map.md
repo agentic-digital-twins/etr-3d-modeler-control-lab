@@ -20,11 +20,26 @@ NUC or vessel-LAN browser
   -> http://<NUC-host>:4231
   -> same-origin /api/* request
   -> production static viewer host
-  -> mounted model-api handler
-  -> validated model fixture
+  -> MODEL_API_UPSTREAM HTTP(S) proxy
+  -> configured model API owner
 ```
 
 `VITE_MODEL_API_BASE_URL` is intentionally empty by default. It is an exceptional direct-browser override, not the normal topology. The NUC service builds the Vite viewer once during installation, then serves the static build through the production Express host; it never runs Vite in dev/watch/HMR mode.
+
+`MODEL_API_UPSTREAM` is the actual production `/api` target. Its default is the private local API listener. `MODEL_API_UPSTREAM_OVERRIDE=true` explicitly permits a different HTTP(S) upstream for bounded experiments; the browser route remains same-origin either way.
+
+## Browser Route Ownership
+
+This lab currently implements only its repository-owned `/api/*` route, proxied to `MODEL_API_UPSTREAM` in both development and production. It does not implement `/_etr/*` routes.
+
+When a future browser surface needs Twin Crew ownership, preserve Twin Crew's explicit same-origin route shapes instead of overloading this lab's `/api` boundary:
+
+| Browser route     | Upstream owner          | Meaning                                                              |
+| ----------------- | ----------------------- | -------------------------------------------------------------------- |
+| `/_etr/api/*`     | ETR API                 | ETR-owned API endpoint, such as `/_etr/api/runtime/database-health`. |
+| `/_etr/runtime/*` | Selected domain runtime | Marine or IPP runtime projection, such as Presence diagnostics.      |
+
+The distinction is documented in Twin Crew's `docs/etr-phases/phase-20/phase-20-slice-5l.7.2-implementation.md`: `/_etr/api` must not be routed to the domain-runtime upstream, and `/_etr/runtime` must not be routed to the ETR API. A consuming application should add an explicit proxy for the relevant route shape rather than direct browser calls to either upstream.
 
 ## Port Allocation
 
@@ -62,6 +77,6 @@ The launcher requires Node.js 24, pnpm 10, curl, installed workspace dependencie
 2. Run `pnpm run install:nuc` from the checked-out repository.
 3. Run `bash scripts/verify-nuc-user-service.sh` after a later restart.
 
-The installer validates the environment and required ports before systemd starts, reconciles locked dependencies, builds the static viewer, installs the checked-in systemd user unit, reloads systemd, enables the service, verifies the installed environment-file reference, then runs the live-process verification. The service repeats configuration and port checks before it starts the production host. The verification script prints the effective non-secret process configuration and probes both surfaces. Use `systemctl --user status etr-3d-modeler-control-lab.service --no-pager` and `journalctl --user -u etr-3d-modeler-control-lab.service -n 100 --no-pager` for troubleshooting.
+The installer validates the environment and dependencies, stops an already-running `etr-3d-modeler-control-lab.service` before port preflight, then fails if either required port remains occupied. It builds the static viewer, installs the checked-in systemd user unit, reloads systemd, enables the service, verifies the installed environment-file reference, then runs the live-process verification. This makes `pnpm run install:nuc` safe for both first installation and subsequent upgrades. The service repeats configuration and port checks before it starts the production host. The verification script prints the effective non-secret process configuration and probes both surfaces. Use `systemctl --user status etr-3d-modeler-control-lab.service --no-pager` and `journalctl --user -u etr-3d-modeler-control-lab.service -n 100 --no-pager` for troubleshooting.
 
 The canonical NUC checkout location is `~/repos/etr-3d-modeler-control-lab`, matching the installed systemd unit. An alternate checkout requires an explicit unit-template/installer change; it is not inferred at installation time.
