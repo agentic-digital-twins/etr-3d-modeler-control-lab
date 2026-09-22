@@ -29,6 +29,8 @@ It starts the API and browser server, checks their health, and prints the usable
 
 See [api-local-browser-env-port-operational-map.md](docs/architecture/api-local-browser-env-port-operational-map.md) for environment ownership, allocated ports, and NUC deployment.
 
+For the reusable Repository Genesis creation procedure, see [README-new-repository-outline.md](README-new-repository-outline.md).
+
 ## Artifact Boundary
 
 The viewer consumes a validated GLB and `EquipmentModelManifest` over the local API. It does not execute Blender or procedural-generation tooling. See [repository-charter.md](docs/architecture/repository-charter.md) and [model-contract-boundaries.md](docs/architecture/model-contract-boundaries.md).

@@ -26,6 +26,19 @@ Chief needs equipment representations that can be identified, explored, instrume
 | Decision date  | 2026-09-21                                                                                                                                                                                   |
 | Decision phase | Phase A / Slice 1                                                                                                                                                                            |
 
+## Repository Provisioning Gate
+
+New repositories created from this charter must be created in the `agentic-digital-twins` GitHub organization. Their canonical `origin` must use the SSH form `git@github.com:agentic-digital-twins/<repository-name>.git`.
+
+Before any feature branch or implementation work begins, establish and push a `main` baseline branch, then verify both conditions:
+
+```bash
+git branch --show-current
+git ls-remote --heads origin main
+```
+
+Expected result: the local branch is `main` and the remote lists `origin/main`. This prevents a repository from starting on an unintended owner or without a reviewable baseline. The reusable procedure is maintained in [README-new-repository-outline.md](../../README-new-repository-outline.md).
+
 ## Ownership
 
 This repository owns equipment-model generation experiments, semantic contracts, model validation, and the model-inspection workbench.
