@@ -13,7 +13,10 @@
     "test:integration": "pnpm --filter @etr/model-api test",
     "test:e2e": "playwright test",
     "dev:api": "pnpm --filter @etr/model-api dev",
-    "dev:viewer": "pnpm --filter @etr/equipment-viewer dev"
+    "dev:viewer": "pnpm --filter @etr/equipment-viewer dev",
+    "run:local": "bash scripts/run-local.sh",
+    "install:nuc": "bash scripts/install-nuc-user-service.sh",
+    "run:nuc": "bash scripts/run-nuc-service.sh"
   },
   "devDependencies": {
     "@playwright/test": "^1.55.0",
