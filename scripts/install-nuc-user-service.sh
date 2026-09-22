@@ -2,6 +2,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$ROOT"
 CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/etr-3d-modeler-control-lab"
 UNIT_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/systemd/user"
 ENV_FILE="$CONFIG_DIR/modeler.env"
@@ -14,15 +15,17 @@ if [[ ! -f "$ENV_FILE" ]]; then
   echo "[modeler-nuc-install] Created $ENV_FILE from the checked-in non-secret defaults."
 fi
 
-for required in MODEL_API_HOST MODEL_API_PORT MODEL_VIEWER_HOST MODEL_VIEWER_PORT MODEL_API_UPSTREAM; do
-  if ! grep -q "^${required}=" "$ENV_FILE"; then
-    echo "[modeler-nuc-install] ERROR: $required is required in $ENV_FILE" >&2
-    exit 1
-  fi
-done
+# shellcheck disable=SC1091
+source "$ROOT/scripts/_modeler-runtime.sh"
+require_modeler_environment_keys "$ENV_FILE"
+load_modeler_environment_file "$ENV_FILE"
+configure_modeler_runtime
+require_modeler_commands false
+validate_modeler_configuration
+ensure_modeler_ports_available
 
-cd "$ROOT"
 pnpm install --frozen-lockfile
+pnpm --filter @etr/equipment-viewer build
 cp "$UNIT_SOURCE" "$UNIT_TARGET"
 systemctl --user daemon-reload
 systemctl --user enable --now etr-3d-modeler-control-lab.service
