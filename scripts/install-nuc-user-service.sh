@@ -11,8 +11,7 @@ UNIT_TARGET="$UNIT_DIR/etr-3d-modeler-control-lab.service"
 mkdir -p "$CONFIG_DIR" "$UNIT_DIR"
 if [[ ! -f "$ENV_FILE" ]]; then
   cp "$ROOT/config/deploy/etr-3d-modeler-control-lab-nuc.env.example" "$ENV_FILE"
-  echo "[modeler-nuc-install] Created $ENV_FILE. Review it, then rerun this installer." >&2
-  exit 1
+  echo "[modeler-nuc-install] Created $ENV_FILE from the checked-in non-secret defaults."
 fi
 
 for required in MODEL_API_HOST MODEL_API_PORT MODEL_VIEWER_HOST MODEL_VIEWER_PORT MODEL_API_UPSTREAM; do
@@ -28,4 +27,5 @@ cp "$UNIT_SOURCE" "$UNIT_TARGET"
 systemctl --user daemon-reload
 systemctl --user enable --now etr-3d-modeler-control-lab.service
 systemctl --user cat etr-3d-modeler-control-lab.service | grep -F "EnvironmentFile=$ENV_FILE"
+bash "$ROOT/scripts/verify-nuc-user-service.sh"
 echo "[modeler-nuc-install] Installed and started etr-3d-modeler-control-lab.service"

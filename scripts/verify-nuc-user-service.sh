@@ -9,7 +9,11 @@ if [[ -z "$pid" || "$pid" == "0" ]]; then
   exit 1
 fi
 
-tr '\0' '\n' < "/proc/$pid/environ" \
+environment="$(tr '\0' '\n' < "/proc/$pid/environ")"
+printf '%s\n' "$environment" \
   | grep -E '^(MODEL_API_HOST|MODEL_API_PORT|MODEL_VIEWER_HOST|MODEL_VIEWER_PORT|MODEL_API_UPSTREAM)='
-curl -fsS "http://127.0.0.1:${MODEL_API_PORT:-4230}/health"
-curl -fsSI "http://127.0.0.1:${MODEL_VIEWER_PORT:-4231}" | head -n 1
+
+api_port="$(printf '%s\n' "$environment" | sed -n 's/^MODEL_API_PORT=//p')"
+viewer_port="$(printf '%s\n' "$environment" | sed -n 's/^MODEL_VIEWER_PORT=//p')"
+curl -fsS "http://127.0.0.1:${api_port}/health"
+curl -fsSI "http://127.0.0.1:${viewer_port}" | head -n 1
