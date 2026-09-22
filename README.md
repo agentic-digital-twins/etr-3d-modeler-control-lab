@@ -19,14 +19,15 @@ pnpm validate:model
 pnpm test:e2e
 ```
 
-For local inspection, run the following commands in separate terminals:
+For local inspection, run the coordinated launcher:
 
 ```bash
-pnpm dev:api
-pnpm dev:viewer
+pnpm run run:local
 ```
 
-Open `http://localhost:5173`. The viewer proxies `/api` requests to the local model API.
+It starts the API and browser server, checks their health, and prints the usable URLs. The browser uses same-origin `/api` requests; the viewer server proxies them to the local API, so a browser on another NUC-network device does not need to resolve `localhost`.
+
+See [api-local-browser-env-port-operational-map.md](docs/architecture/api-local-browser-env-port-operational-map.md) for environment ownership, allocated ports, and NUC deployment.
 
 ## Artifact Boundary
 

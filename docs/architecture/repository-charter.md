@@ -37,3 +37,11 @@ It does not own vessel or equipment operational state, telemetry truth, alert li
 The first customer is the Detroit Diesel 8V92TA Equipment Explorer. Plausible future customers include Marine and IPP equipment explorers.
 
 Promotion from this lab requires a proven shared consumer or runtime requirement. Any promoted runtime capability requires a separate ETR ownership decision.
+
+## Local and NUC Operations
+
+The local catalog API and browser server are separate operational surfaces. The browser makes relative `/api` requests; its server-side proxy owns the API upstream address so remote NUC browsers never receive `localhost` as an API target.
+
+Root `.env` is for local/manual process configuration. App-local `.env` files contain only browser-build variables and must not contain NUC topology or secrets. Installed NUC services use a dedicated, machine-local environment file referenced by the systemd user unit; the checked-in `config/deploy` template and installer are the deployment source of truth. Every required NUC setting must be installed, verified in the unit, and confirmed in the live process after restart.
+
+Port allocation and launch procedures are maintained in [api-local-browser-env-port-operational-map.md](api-local-browser-env-port-operational-map.md).
