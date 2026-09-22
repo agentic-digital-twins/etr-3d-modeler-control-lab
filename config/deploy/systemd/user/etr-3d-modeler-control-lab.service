@@ -1,0 +1,14 @@
+[Unit]
+Description=ETR 3D Modeler Control Lab
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/repos/etr-3d-modeler-control-lab
+EnvironmentFile=%h/.config/etr-3d-modeler-control-lab/modeler.env
+ExecStart=/usr/bin/env bash %h/repos/etr-3d-modeler-control-lab/scripts/run-nuc-service.sh
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=default.target

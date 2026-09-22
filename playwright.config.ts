@@ -6,19 +6,19 @@ export default defineConfig({
   webServer: [
     {
       command: "pnpm --filter @etr/model-api dev",
-      url: "http://localhost:4310/health",
+      url: "http://127.0.0.1:4230/health",
       reuseExistingServer: true,
       timeout: 120_000,
     },
     {
       command: "pnpm --filter @etr/equipment-viewer dev",
-      url: "http://localhost:5173",
+      url: "http://127.0.0.1:4231",
       reuseExistingServer: true,
       timeout: 120_000,
     },
   ],
   use: {
-    baseURL: "http://localhost:5173",
+    baseURL: "http://127.0.0.1:4231",
     screenshot: "only-on-failure",
   },
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
