@@ -4,8 +4,8 @@ import { Canvas, type ThreeEvent } from "@react-three/fiber"
 import type { Object3D } from "three"
 
 import {
-  EquipmentModelManifestSchema,
-  type EquipmentModelManifest,
+  SpatialModelManifestSchema,
+  type SpatialModelManifest,
 } from "@etr/equipment-model-contracts"
 
 const apiBaseUrl = import.meta.env.VITE_MODEL_API_BASE_URL ?? ""
@@ -15,15 +15,15 @@ type VisibilityMode = "all" | "isolated"
 
 function Model({
   manifest,
-  selectedComponentId,
+  selectedSemanticId,
   visibilityMode,
   onSelect,
   onReady,
 }: {
-  manifest: EquipmentModelManifest
-  selectedComponentId?: string
+  manifest: SpatialModelManifest
+  selectedSemanticId?: string
   visibilityMode: VisibilityMode
-  onSelect: (componentId: string) => void
+  onSelect: (semanticId: string) => void
   onReady: () => void
 }) {
   const { scene } = useGLTF(
@@ -32,14 +32,14 @@ function Model({
 
   useEffect(() => {
     scene.traverse((node: Object3D) => {
-      const component = manifest.components.find(
-        (candidate) => candidate.glbNodeName === node.name,
+      const semanticNode = manifest.semanticNodes.find((candidate) =>
+        candidate.representation.glbNodes.includes(node.name),
       )
       node.visible =
         visibilityMode === "all" ||
-        component?.componentId === selectedComponentId
+        semanticNode?.semanticId === selectedSemanticId
     })
-  }, [manifest.components, scene, selectedComponentId, visibilityMode])
+  }, [manifest.semanticNodes, scene, selectedSemanticId, visibilityMode])
 
   useEffect(() => {
     onReady()
@@ -50,11 +50,11 @@ function Model({
       object={scene}
       onClick={(event: ThreeEvent<MouseEvent>) => {
         event.stopPropagation()
-        const component = manifest.components.find(
-          (candidate) => candidate.glbNodeName === event.object.name,
+        const semanticNode = manifest.semanticNodes.find((candidate) =>
+          candidate.representation.glbNodes.includes(event.object.name),
         )
-        if (component) {
-          onSelect(component.componentId)
+        if (semanticNode) {
+          onSelect(semanticNode.semanticId)
         }
       }}
     />
@@ -62,8 +62,8 @@ function Model({
 }
 
 export function App() {
-  const [manifest, setManifest] = useState<EquipmentModelManifest>()
-  const [selectedComponentId, setSelectedComponentId] = useState<string>()
+  const [manifest, setManifest] = useState<SpatialModelManifest>()
+  const [selectedSemanticId, setSelectedSemanticId] = useState<string>()
   const [visibilityMode, setVisibilityMode] = useState<VisibilityMode>("all")
   const [isArtifactReady, setIsArtifactReady] = useState(false)
   const [error, setError] = useState<string>()
@@ -80,7 +80,7 @@ export function App() {
         if (!response.ok) {
           throw new Error(`Model API returned ${response.status}`)
         }
-        setManifest(EquipmentModelManifestSchema.parse(await response.json()))
+        setManifest(SpatialModelManifestSchema.parse(await response.json()))
       } catch (loadError) {
         if (!controller.signal.aborted) {
           setError(
@@ -96,8 +96,8 @@ export function App() {
     return () => controller.abort()
   }, [])
 
-  const selectedComponent = manifest?.components.find(
-    (component) => component.componentId === selectedComponentId,
+  const selectedSemanticNode = manifest?.semanticNodes.find(
+    (semanticNode) => semanticNode.semanticId === selectedSemanticId,
   )
 
   if (error) {
@@ -142,10 +142,10 @@ export function App() {
             <Suspense fallback={null}>
               <Model
                 manifest={manifest}
-                selectedComponentId={selectedComponentId}
+                selectedSemanticId={selectedSemanticId}
                 visibilityMode={visibilityMode}
-                onSelect={(componentId) => {
-                  setSelectedComponentId(componentId)
+                onSelect={(semanticId) => {
+                  setSelectedSemanticId(semanticId)
                   setVisibilityMode("all")
                 }}
                 onReady={() => setIsArtifactReady(true)}
@@ -157,22 +157,22 @@ export function App() {
       </section>
       <aside className="controls">
         <section>
-          <h2>Components</h2>
+          <h2>Semantic nodes</h2>
           <div className="component-list">
-            {manifest.components.map((component) => (
+            {manifest.semanticNodes.map((semanticNode) => (
               <button
                 className={
-                  component.componentId === selectedComponentId
+                  semanticNode.semanticId === selectedSemanticId
                     ? "selected"
                     : ""
                 }
-                key={component.componentId}
+                key={semanticNode.semanticId}
                 onClick={() => {
-                  setSelectedComponentId(component.componentId)
+                  setSelectedSemanticId(semanticNode.semanticId)
                   setVisibilityMode("all")
                 }}
               >
-                {component.displayName}
+                {semanticNode.displayName}
               </button>
             ))}
           </div>
@@ -181,7 +181,7 @@ export function App() {
           <h2>View</h2>
           <div className="command-row">
             <button
-              disabled={!selectedComponentId}
+              disabled={!selectedSemanticId}
               onClick={() => setVisibilityMode("isolated")}
             >
               Isolate
@@ -189,7 +189,7 @@ export function App() {
             <button onClick={() => setVisibilityMode("all")}>Show all</button>
             <button
               onClick={() => {
-                setSelectedComponentId(undefined)
+                setSelectedSemanticId(undefined)
                 setVisibilityMode("all")
               }}
             >
@@ -199,17 +199,17 @@ export function App() {
         </section>
         <section className="details">
           <h2>Selection</h2>
-          {selectedComponent ? (
+          {selectedSemanticNode ? (
             <dl>
-              <dt>Component</dt>
-              <dd>{selectedComponent.componentId}</dd>
+              <dt>Semantic node</dt>
+              <dd>{selectedSemanticNode.semanticId}</dd>
               <dt>Role</dt>
-              <dd>{selectedComponent.semanticRole}</dd>
+              <dd>{selectedSemanticNode.semanticRole}</dd>
               <dt>Capabilities</dt>
-              <dd>{selectedComponent.capabilities.join(", ")}</dd>
+              <dd>{selectedSemanticNode.interactionCapabilities.join(", ")}</dd>
             </dl>
           ) : (
-            <p>Select a semantic component in the canvas or list.</p>
+            <p>Select a semantic node in the canvas or list.</p>
           )}
         </section>
       </aside>

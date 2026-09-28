@@ -26,7 +26,7 @@ export async function createApp(): Promise<Express> {
   const app = express()
 
   app.get("/health", (_request, response) => {
-    response.json({ status: "ok", capability: "equipment-model-catalog" })
+    response.json({ status: "ok", capability: "spatial-model-catalog" })
   })
 
   app.get("/api/models", (_request, response) => {

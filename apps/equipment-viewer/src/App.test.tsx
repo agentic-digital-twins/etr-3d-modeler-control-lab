@@ -17,9 +17,12 @@ vi.mock("@react-three/drei", () => ({
 const manifest = {
   modelId: "detroit-diesel-8v92ta-cylinder-prototype",
   modelKind: "detroit-diesel-8v92ta-cylinder-assembly",
+  modelProfile: "equipment",
   modelVersion: "0.1.0",
-  subjectId: "equipment-model:detroit-diesel-8v92ta-cylinder-prototype",
-  subjectKind: "equipment-model",
+  subject: {
+    subjectId: "equipment-model:detroit-diesel-8v92ta-cylinder-prototype",
+    subjectKind: "equipment-model",
+  },
   artifact: {
     artifactId: "fixture",
     artifactVersion: "0.1.0",
@@ -34,14 +37,14 @@ const manifest = {
   generatedAt: "2026-09-21T00:00:00.000Z",
   exportedAt: "2026-09-21T00:00:00.000Z",
   validatedAt: "2026-09-21T00:00:00.000Z",
-  components: [
+  semanticNodes: [
     {
-      componentId: "piston.l1",
-      componentKind: "piston",
+      semanticId: "piston.l1",
+      semanticKind: "piston",
       semanticRole: "reciprocating-element",
       displayName: "Piston L1",
-      glbNodeName: "Piston_L1",
-      capabilities: ["selectable", "isolatable"],
+      representation: { glbNodes: ["Piston_L1"] },
+      interactionCapabilities: ["selectable", "isolatable"],
     },
   ],
 }
@@ -67,7 +70,7 @@ describe("Equipment Explorer", () => {
     )
     fireEvent.click(screen.getByRole("button", { name: "Reset" }))
     expect(
-      screen.getByText("Select a semantic component in the canvas or list."),
+      screen.getByText("Select a semantic node in the canvas or list."),
     ).toBeTruthy()
   })
 })
