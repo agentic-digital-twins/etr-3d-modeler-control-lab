@@ -15,18 +15,18 @@ vi.mock("@react-three/drei", () => ({
 }))
 
 const manifest = {
-  modelId: "detroit-diesel-8v92ta-cylinder-prototype",
-  modelKind: "detroit-diesel-8v92ta-cylinder-assembly",
-  modelProfile: "equipment",
+  modelId: "hatteras-63-motor-yacht-prototype",
+  modelKind: "hatteras-63-motor-yacht",
+  modelProfile: "vessel",
   modelVersion: "0.1.0",
   subject: {
-    subjectId: "equipment-model:detroit-diesel-8v92ta-cylinder-prototype",
-    subjectKind: "equipment-model",
+    subjectId: "vessel-model:hatteras-63-motor-yacht-prototype",
+    subjectKind: "vessel-model",
   },
   artifact: {
     artifactId: "fixture",
     artifactVersion: "0.1.0",
-    fileName: "fixture.glb",
+    fileName: "hatteras-63-motor-yacht.glb",
     contentFingerprint: `sha256:${"a".repeat(64)}`,
   },
   generator: { name: "fixture", version: "0.1.0", sourceRevision: "test" },
@@ -39,17 +39,71 @@ const manifest = {
   validatedAt: "2026-09-21T00:00:00.000Z",
   semanticNodes: [
     {
-      semanticId: "piston.l1",
-      semanticKind: "piston",
-      semanticRole: "reciprocating-element",
-      displayName: "Piston L1",
-      representation: { glbNodes: ["Piston_L1"] },
-      interactionCapabilities: ["selectable", "isolatable"],
+      semanticId: "vessel.hatteras-63",
+      semanticKind: "vessel",
+      semanticRole: "motor-yacht",
+      displayName: "Hatteras 63 Motor Yacht",
+      representation: { glbNodes: ["HatterasHull"] },
+      interactionCapabilities: ["selectable"],
+    },
+    {
+      semanticId: "vessel.area.flybridge",
+      semanticKind: "area",
+      semanticRole: "vessel-area",
+      displayName: "Flybridge",
+      representation: { glbNodes: ["HatterasFlybridge"] },
+      interactionCapabilities: ["selectable", "highlightable"],
+      spatial: {
+        placementRegions: [
+          {
+            regionId: "overhead",
+            displayName: "Flybridge overhead",
+            regionKind: "placement-volume",
+            transform: { position: [0, 3, 0] },
+            dimensions: [1, 1, 1],
+          },
+        ],
+        placementAnchors: [
+          {
+            anchorId: "overhead-center",
+            displayName: "Overhead center",
+            transform: { position: [0, 3, 0] },
+            placementRegionId: "overhead",
+          },
+        ],
+      },
+    },
+    {
+      semanticId: "vessel.area.engine-room",
+      semanticKind: "area",
+      semanticRole: "vessel-area",
+      displayName: "Engine Room",
+      representation: { glbNodes: ["HatterasEngineRoom"] },
+      interactionCapabilities: ["selectable", "highlightable"],
+      spatial: {
+        placementRegions: [
+          {
+            regionId: "bilge",
+            displayName: "Engine room bilge",
+            regionKind: "placement-volume",
+            transform: { position: [0, 0, -2] },
+            dimensions: [1, 1, 1],
+          },
+        ],
+        placementAnchors: [
+          {
+            anchorId: "bilge-center",
+            displayName: "Bilge center",
+            transform: { position: [0, 0, -2] },
+            placementRegionId: "bilge",
+          },
+        ],
+      },
     },
   ],
 }
 
-describe("Equipment Explorer", () => {
+describe("Spatial Model Explorer", () => {
   beforeEach(() => {
     vi.stubGlobal(
       "fetch",
@@ -57,20 +111,17 @@ describe("Equipment Explorer", () => {
     )
   })
 
-  it("loads a manifest and exposes semantic selection controls", async () => {
+  it("places capability representations through vessel area anchors", async () => {
     render(<App />)
 
-    const component = await screen.findByRole("button", { name: "Piston L1" })
-    fireEvent.click(component)
+    await screen.findByRole("heading", { name: "Hatteras 63 Motor Yacht" })
+    fireEvent.click(screen.getByRole("button", { name: "Flybridge" }))
+    fireEvent.click(screen.getByRole("button", { name: "Add capability" }))
+    expect(screen.getByText("Thermal Camera · Flybridge")).toBeTruthy()
 
-    expect(screen.getByText("piston.l1")).toBeTruthy()
-    expect(screen.getByRole("button", { name: "Isolate" })).toHaveProperty(
-      "disabled",
-      false,
-    )
-    fireEvent.click(screen.getByRole("button", { name: "Reset" }))
-    expect(
-      screen.getByText("Select a semantic node in the canvas or list."),
-    ).toBeTruthy()
+    fireEvent.click(screen.getByRole("button", { name: "Water Sensor" }))
+    fireEvent.click(screen.getByRole("button", { name: "Engine Room" }))
+    fireEvent.click(screen.getByRole("button", { name: "Add capability" }))
+    expect(screen.getByText("Water Sensor · Engine Room")).toBeTruthy()
   })
 })

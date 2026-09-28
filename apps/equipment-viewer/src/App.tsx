@@ -1,7 +1,7 @@
 import { Suspense, useEffect, useState } from "react"
 import { Bounds, OrbitControls, useGLTF } from "@react-three/drei"
 import { Canvas, type ThreeEvent } from "@react-three/fiber"
-import type { Object3D } from "three"
+import { Mesh, MeshStandardMaterial, type Object3D } from "three"
 
 import {
   SpatialModelManifestSchema,
@@ -9,19 +9,75 @@ import {
 } from "@etr/equipment-model-contracts"
 
 const apiBaseUrl = import.meta.env.VITE_MODEL_API_BASE_URL ?? ""
-const defaultModelId = "detroit-diesel-8v92ta-cylinder-prototype"
+const defaultModelId = "hatteras-63-motor-yacht-prototype"
 
 type VisibilityMode = "all" | "isolated"
+type CapabilityKind = "camera.thermal" | "audio.speaker" | "sensor.water"
+type CapabilityPlacement = {
+  capability: CapabilityKind
+  areaId: string
+  anchorId: string
+}
+
+const capabilityDefinitions: Array<{
+  capability: CapabilityKind
+  displayName: string
+}> = [
+  { capability: "camera.thermal", displayName: "Thermal Camera" },
+  { capability: "audio.speaker", displayName: "Speaker" },
+  { capability: "sensor.water", displayName: "Water Sensor" },
+]
+
+function CapabilityMarker({
+  capability,
+  position,
+}: {
+  capability: CapabilityKind
+  position: [number, number, number]
+}) {
+  if (capability === "camera.thermal") {
+    return (
+      <group position={position}>
+        <mesh rotation={[Math.PI / 2, 0, 0]}>
+          <cylinderGeometry args={[0.14, 0.14, 0.35, 16]} />
+          <meshStandardMaterial color="#f4b763" emissive="#6f4219" />
+        </mesh>
+        <mesh position={[0, 0, 0.22]}>
+          <sphereGeometry args={[0.11, 16, 16]} />
+          <meshStandardMaterial color="#152830" emissive="#163f4e" />
+        </mesh>
+      </group>
+    )
+  }
+
+  if (capability === "audio.speaker") {
+    return (
+      <mesh position={position} rotation={[Math.PI / 2, 0, 0]}>
+        <cylinderGeometry args={[0.18, 0.18, 0.12, 20]} />
+        <meshStandardMaterial color="#d76d3e" emissive="#6f2918" />
+      </mesh>
+    )
+  }
+
+  return (
+    <mesh position={position}>
+      <boxGeometry args={[0.22, 0.12, 0.22]} />
+      <meshStandardMaterial color="#58a6a2" emissive="#164442" />
+    </mesh>
+  )
+}
 
 function Model({
   manifest,
   selectedSemanticId,
+  activeAreaId,
   visibilityMode,
   onSelect,
   onReady,
 }: {
   manifest: SpatialModelManifest
   selectedSemanticId?: string
+  activeAreaId?: string
   visibilityMode: VisibilityMode
   onSelect: (semanticId: string) => void
   onReady: () => void
@@ -32,14 +88,39 @@ function Model({
 
   useEffect(() => {
     scene.traverse((node: Object3D) => {
+      if (
+        node instanceof Mesh &&
+        node.material instanceof MeshStandardMaterial
+      ) {
+        node.material = node.material.clone()
+      }
+    })
+  }, [scene])
+
+  useEffect(() => {
+    scene.traverse((node: Object3D) => {
       const semanticNode = manifest.semanticNodes.find((candidate) =>
         candidate.representation.glbNodes.includes(node.name),
       )
       node.visible =
         visibilityMode === "all" ||
         semanticNode?.semanticId === selectedSemanticId
+      if (
+        node instanceof Mesh &&
+        node.material instanceof MeshStandardMaterial
+      ) {
+        const isActiveArea = semanticNode?.semanticId === activeAreaId
+        node.material.color.set(isActiveArea ? "#f4b763" : "#418da2")
+        node.material.emissive.set(isActiveArea ? "#6f4219" : "#000000")
+      }
     })
-  }, [manifest.semanticNodes, scene, selectedSemanticId, visibilityMode])
+  }, [
+    activeAreaId,
+    manifest.semanticNodes,
+    scene,
+    selectedSemanticId,
+    visibilityMode,
+  ])
 
   useEffect(() => {
     onReady()
@@ -64,6 +145,10 @@ function Model({
 export function App() {
   const [manifest, setManifest] = useState<SpatialModelManifest>()
   const [selectedSemanticId, setSelectedSemanticId] = useState<string>()
+  const [activeAreaId, setActiveAreaId] = useState<string>()
+  const [selectedCapability, setSelectedCapability] =
+    useState<CapabilityKind>("camera.thermal")
+  const [placements, setPlacements] = useState<CapabilityPlacement[]>([])
   const [visibilityMode, setVisibilityMode] = useState<VisibilityMode>("all")
   const [isArtifactReady, setIsArtifactReady] = useState(false)
   const [error, setError] = useState<string>()
@@ -99,57 +184,105 @@ export function App() {
   const selectedSemanticNode = manifest?.semanticNodes.find(
     (semanticNode) => semanticNode.semanticId === selectedSemanticId,
   )
+  const areas = manifest?.semanticNodes.filter(
+    (semanticNode) => semanticNode.semanticKind === "area",
+  )
+  const activeArea = areas?.find(
+    (semanticNode) => semanticNode.semanticId === activeAreaId,
+  )
 
   if (error) {
     return (
       <main className="state-panel">
-        <h1>Equipment Explorer</h1>
+        <h1>Spatial Model Explorer</h1>
         <p>{error}</p>
       </main>
     )
   }
 
-  if (!manifest) {
+  if (!manifest || !areas) {
     return (
       <main className="state-panel">
-        <h1>Equipment Explorer</h1>
+        <h1>Spatial Model Explorer</h1>
         <p>Loading validated model artifact...</p>
       </main>
     )
+  }
+
+  function selectSemanticNode(semanticId: string) {
+    const semanticNode = manifest?.semanticNodes.find(
+      (candidate) => candidate.semanticId === semanticId,
+    )
+    setSelectedSemanticId(semanticId)
+    setVisibilityMode("all")
+    if (semanticNode?.semanticKind === "area") {
+      setActiveAreaId(semanticId)
+    }
+  }
+
+  function addCapability() {
+    const anchor = activeArea?.spatial?.placementAnchors[0]
+    if (!activeArea || !anchor) {
+      return
+    }
+    setPlacements((current) => [
+      ...current,
+      {
+        capability: selectedCapability,
+        areaId: activeArea.semanticId,
+        anchorId: anchor.anchorId,
+      },
+    ])
   }
 
   return (
     <main className="workbench">
       <header>
         <div>
-          <p className="eyebrow">Equipment Explorer</p>
-          <h1>Detroit Diesel 8V92TA</h1>
+          <p className="eyebrow">Spatial Model Explorer</p>
+          <h1>
+            {manifest.semanticNodes[0]?.displayName ?? manifest.modelKind}
+          </h1>
         </div>
         <p className="artifact">
-          {manifest.artifact.artifactVersion} · validated fixture
+          {manifest.modelProfile} · {manifest.artifact.artifactVersion} ·
+          validated fixture
         </p>
       </header>
       <section
         className="canvas-shell"
-        aria-label="Interactive equipment model"
+        aria-label="Interactive vessel model"
         data-artifact-ready={isArtifactReady}
       >
-        <Canvas camera={{ position: [0, 0, 2.5], fov: 45 }}>
+        <Canvas camera={{ position: [8, 6, 9], fov: 45 }}>
           <color attach="background" args={["#dfe7e5"]} />
           <ambientLight intensity={1.5} />
           <directionalLight position={[2, 3, 4]} intensity={2} />
-          <Bounds fit clip observe margin={1.8}>
+          <Bounds fit clip observe margin={1.5}>
             <Suspense fallback={null}>
               <Model
                 manifest={manifest}
                 selectedSemanticId={selectedSemanticId}
+                activeAreaId={activeAreaId}
                 visibilityMode={visibilityMode}
-                onSelect={(semanticId) => {
-                  setSelectedSemanticId(semanticId)
-                  setVisibilityMode("all")
-                }}
+                onSelect={selectSemanticNode}
                 onReady={() => setIsArtifactReady(true)}
               />
+              {placements.map((placement, index) => {
+                const area = areas.find(
+                  (candidate) => candidate.semanticId === placement.areaId,
+                )
+                const anchor = area?.spatial?.placementAnchors.find(
+                  (candidate) => candidate.anchorId === placement.anchorId,
+                )
+                return anchor ? (
+                  <CapabilityMarker
+                    capability={placement.capability}
+                    key={`${placement.capability}-${placement.areaId}-${index}`}
+                    position={anchor.transform.position}
+                  />
+                ) : null
+              })}
             </Suspense>
           </Bounds>
           <OrbitControls makeDefault />
@@ -157,25 +290,64 @@ export function App() {
       </section>
       <aside className="controls">
         <section>
-          <h2>Semantic nodes</h2>
+          <h2>Capability</h2>
           <div className="component-list">
-            {manifest.semanticNodes.map((semanticNode) => (
+            {capabilityDefinitions.map((definition) => (
               <button
                 className={
-                  semanticNode.semanticId === selectedSemanticId
-                    ? "selected"
-                    : ""
+                  definition.capability === selectedCapability ? "selected" : ""
                 }
-                key={semanticNode.semanticId}
-                onClick={() => {
-                  setSelectedSemanticId(semanticNode.semanticId)
-                  setVisibilityMode("all")
-                }}
+                key={definition.capability}
+                onClick={() => setSelectedCapability(definition.capability)}
               >
-                {semanticNode.displayName}
+                {definition.displayName}
               </button>
             ))}
           </div>
+        </section>
+        <section>
+          <h2>Area</h2>
+          <div className="component-list">
+            {areas.map((area) => (
+              <button
+                className={area.semanticId === activeAreaId ? "selected" : ""}
+                key={area.semanticId}
+                onClick={() => selectSemanticNode(area.semanticId)}
+              >
+                {area.displayName}
+              </button>
+            ))}
+          </div>
+        </section>
+        <section>
+          <h2>Configuration</h2>
+          <div className="command-row">
+            <button disabled={!activeArea} onClick={addCapability}>
+              Add capability
+            </button>
+            <button onClick={() => setPlacements([])}>Clear placements</button>
+          </div>
+          {placements.length > 0 ? (
+            <ul className="placement-list">
+              {placements.map((placement, index) => {
+                const definition = capabilityDefinitions.find(
+                  (candidate) => candidate.capability === placement.capability,
+                )
+                const area = areas.find(
+                  (candidate) => candidate.semanticId === placement.areaId,
+                )
+                return (
+                  <li
+                    key={`${placement.areaId}-${placement.anchorId}-${index}`}
+                  >
+                    {definition?.displayName} · {area?.displayName}
+                  </li>
+                )
+              })}
+            </ul>
+          ) : (
+            <p>Select a capability and area to create a placement.</p>
+          )}
         </section>
         <section>
           <h2>View</h2>
@@ -190,6 +362,7 @@ export function App() {
             <button
               onClick={() => {
                 setSelectedSemanticId(undefined)
+                setActiveAreaId(undefined)
                 setVisibilityMode("all")
               }}
             >
@@ -205,8 +378,10 @@ export function App() {
               <dd>{selectedSemanticNode.semanticId}</dd>
               <dt>Role</dt>
               <dd>{selectedSemanticNode.semanticRole}</dd>
-              <dt>Capabilities</dt>
-              <dd>{selectedSemanticNode.interactionCapabilities.join(", ")}</dd>
+              <dt>Anchor</dt>
+              <dd>
+                {activeArea?.spatial?.placementAnchors[0]?.anchorId ?? "None"}
+              </dd>
             </dl>
           ) : (
             <p>Select a semantic node in the canvas or list.</p>

@@ -16,6 +16,10 @@ const fixtureManifest = join(
   "dd-8v92ta-cylinder.manifest.json",
 )
 const fixtureArtifact = join(fixtureDirectory, "dd-8v92ta-cylinder.glb")
+const hatterasFixtureDirectory = join(
+  import.meta.dirname,
+  "../../../fixtures/spatial-models",
+)
 const temporaryDirectories: string[] = []
 
 async function createFixture(): Promise<{
@@ -67,6 +71,15 @@ describe("validateModel", () => {
     const { manifestPath, artifactPath } = await createFixture()
     await expect(
       validateModel(manifestPath, artifactPath),
+    ).resolves.toMatchObject({ valid: true })
+  })
+
+  it("accepts the checked-in Hatteras vessel fixture", async () => {
+    await expect(
+      validateModel(
+        join(hatterasFixtureDirectory, "hatteras-63-motor-yacht.manifest.json"),
+        join(hatterasFixtureDirectory, "hatteras-63-motor-yacht.glb"),
+      ),
     ).resolves.toMatchObject({ valid: true })
   })
 

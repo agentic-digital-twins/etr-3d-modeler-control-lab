@@ -85,6 +85,12 @@ h2 {
   flex-wrap: wrap;
   gap: 0.5rem;
 }
+.placement-list {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0.8rem 0 0;
+  padding-left: 1.1rem;
+}
 .details {
   border-top: 1px solid #aebbb4;
   padding-top: 1.25rem;
