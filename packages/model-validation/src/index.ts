@@ -159,8 +159,14 @@ export async function validateModel(
       }
       placementRegionIds.add(placementRegion.regionId)
     }
+    const placementAnchorIds = new Set<string>()
     for (const placementAnchor of semanticNode.spatial?.placementAnchors ??
       []) {
+      if (placementAnchorIds.has(placementAnchor.anchorId)) {
+        errors.push(
+          `Duplicate placement anchor: ${semanticNode.semanticId} -> ${placementAnchor.anchorId}`,
+        )
+      }
       if (
         placementAnchor.placementRegionId &&
         !placementRegionIds.has(placementAnchor.placementRegionId)
@@ -169,6 +175,7 @@ export async function validateModel(
           `Placement anchor region not found: ${semanticNode.semanticId} -> ${placementAnchor.placementRegionId}`,
         )
       }
+      placementAnchorIds.add(placementAnchor.anchorId)
     }
   }
   validateContainment(manifest, errors)

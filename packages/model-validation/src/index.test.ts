@@ -113,6 +113,36 @@ describe("validateModel", () => {
     ).resolves.toMatchObject({ valid: true })
   })
 
+  it("rejects duplicate placement anchors within a semantic node", async () => {
+    const { manifestPath, artifactPath } = await createFixture()
+    await mutateManifest(manifestPath, (manifest) => {
+      manifest.semanticNodes[0].spatial = {
+        placementRegions: [],
+        placementAnchors: [
+          {
+            anchorId: "overhead-center",
+            displayName: "Overhead center",
+            transform: { position: [0, 0, 0] },
+          },
+          {
+            anchorId: "overhead-center",
+            displayName: "Overhead center duplicate",
+            transform: { position: [0, 1, 0] },
+          },
+        ],
+      }
+    })
+
+    const report = await validateModel(manifestPath, artifactPath)
+
+    expect(report).toMatchObject({ valid: false })
+    if (!report.valid) {
+      expect(report.errors).toContain(
+        "Duplicate placement anchor: cylinder.l1 -> overhead-center",
+      )
+    }
+  })
+
   it("rejects an artifact whose file name differs from the manifest", async () => {
     const { manifestPath, artifactPath } = await createFixture()
     await mutateManifest(manifestPath, (manifest) => {
