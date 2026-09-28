@@ -26,6 +26,11 @@ The vessel manifest owns reusable spatial truth only. Capability instances, sele
 
 Use `modelReferences[]` only when a vessel needs to declare an independently versioned attached model. Nested model loading is deferred; Slice 1 renders generic Three.js capability primitives directly from configuration data.
 
+## Deferred contract decisions
+
+- Keep `modelProfile` as an open string in Slice 0. Slice 1 will define vessel-specific invariants only after the first Hatteras model establishes the required level and area semantics.
+- Keep `modelReferences[]` unpinned in Slice 0 because composition is declarative only. Before nested model loading is implemented, require a deterministic referenced model version or resolved artifact identity.
+
 ---
 
 # 1. Core design principle
