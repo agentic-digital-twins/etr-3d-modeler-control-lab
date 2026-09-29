@@ -111,7 +111,7 @@ import net from "node:net"
 
 const listeners = [
   [process.env.MODEL_API_HOST, Number(process.env.MODEL_API_PORT), "Model API"],
-  [process.env.MODEL_VIEWER_HOST, Number(process.env.MODEL_VIEWER_PORT), "Equipment Explorer"],
+  [process.env.MODEL_VIEWER_HOST, Number(process.env.MODEL_VIEWER_PORT), "Spatial Model Explorer"],
 ]
 
 await Promise.all(listeners.map(([host, port, label]) => new Promise((resolve, reject) => {
@@ -130,7 +130,7 @@ import { execFileSync } from "node:child_process"
 
 const listeners = [
   [Number(process.env.MODEL_API_PORT), "Model API"],
-  [Number(process.env.MODEL_VIEWER_PORT), "Equipment Explorer"],
+  [Number(process.env.MODEL_VIEWER_PORT), "Spatial Model Explorer"],
 ]
 
 function listenerPids(port) {

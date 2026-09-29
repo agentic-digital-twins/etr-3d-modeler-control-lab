@@ -17,6 +17,7 @@ if [[ ! -d "$ROOT/node_modules" ]]; then
   exit 1
 fi
 validate_modeler_configuration
+echo "[modeler-local] Local development only: reclaiming configured ports stops any listener on them; do not use this behavior for production startup."
 reclaim_modeler_ports
 
 for _ in {1..30}; do
