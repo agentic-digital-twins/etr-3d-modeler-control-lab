@@ -9,7 +9,9 @@ import {
 } from "@etr/equipment-model-contracts"
 
 const apiBaseUrl = import.meta.env.VITE_MODEL_API_BASE_URL ?? ""
-const defaultModelId = "hatteras-63-motor-yacht-prototype"
+const defaultModelId =
+  new URLSearchParams(window.location.search).get("model") ??
+  "hatteras-63-motor-yacht-prototype"
 
 type VisibilityMode = "all" | "isolated"
 type CapabilityKind = "camera.thermal" | "audio.speaker" | "sensor.water"

@@ -20,6 +20,7 @@ const hatterasFixtureDirectory = join(
   import.meta.dirname,
   "../../../fixtures/spatial-models",
 )
+const centerConsoleFixtureDirectory = hatterasFixtureDirectory
 const temporaryDirectories: string[] = []
 
 async function createFixture(): Promise<{
@@ -109,6 +110,26 @@ describe("validateModel", () => {
           (node) => node.semanticKind === "level",
         ),
       ).toHaveLength(4)
+    }
+  })
+
+  it("accepts the checked-in Center Console vessel fixture", async () => {
+    const report = await validateModel(
+      join(
+        centerConsoleFixtureDirectory,
+        "offshore-center-console.manifest.json",
+      ),
+      join(centerConsoleFixtureDirectory, "offshore-center-console.glb"),
+    )
+
+    expect(report).toMatchObject({ valid: true })
+    if (report.valid) {
+      expect(report.manifest.modelId).toBe("offshore-center-console")
+      expect(
+        report.manifest.semanticNodes.filter(
+          (node) => node.semanticKind === "level",
+        ),
+      ).toHaveLength(3)
     }
   })
 

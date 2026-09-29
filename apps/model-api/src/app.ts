@@ -31,6 +31,16 @@ const fixtures = [
       "fixtures/spatial-models/hatteras-63-motor-yacht.glb",
     ),
   },
+  {
+    manifestPath: resolve(
+      repositoryRoot,
+      "fixtures/spatial-models/offshore-center-console.manifest.json",
+    ),
+    artifactPath: resolve(
+      repositoryRoot,
+      "fixtures/spatial-models/offshore-center-console.glb",
+    ),
+  },
 ]
 
 type ValidatedModel = {

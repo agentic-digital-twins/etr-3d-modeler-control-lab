@@ -1,0 +1,673 @@
+{
+  "modelId": "offshore-center-console",
+  "modelKind": "vessel",
+  "modelProfile": "vessel",
+  "modelVersion": "0.1.0",
+  "subject": {
+    "subjectId": "vessel-model:offshore-center-console",
+    "subjectKind": "vessel-model"
+  },
+  "artifact": {
+    "artifactId": "offshore-center-console-fixture",
+    "artifactVersion": "0.1.0",
+    "fileName": "offshore-center-console.glb",
+    "contentFingerprint": "sha256:ee0e9678c0a5c748cc502a14dfc95c6a86e5997961ca99ef90175d3d6979d8da"
+  },
+  "generator": {
+    "name": "phase-2-center-console-fixture-generator",
+    "version": "0.1.0",
+    "sourceRevision": "phase-2-slice-2"
+  },
+  "sourceReferences": [],
+  "coordinateFrame": "right-handed-y-up",
+  "placementCoordinateFrame": "model",
+  "units": "meters",
+  "createdAt": "2026-09-29T00:00:00.000Z",
+  "generatedAt": "2026-09-29T00:00:00.000Z",
+  "exportedAt": "2026-09-29T00:00:00.000Z",
+  "validatedAt": "2026-09-29T00:00:00.000Z",
+  "semanticNodes": [
+    {
+      "semanticId": "vessel.offshore-center-console",
+      "semanticKind": "vessel",
+      "semanticRole": "offshore-center-console",
+      "displayName": "Offshore Center Console",
+      "representation": {
+        "glbNodes": [
+          "CenterConsoleHull",
+          "CenterConsoleHullBow"
+        ]
+      },
+      "interactionCapabilities": [
+        "selectable"
+      ]
+    },
+    {
+      "semanticId": "vessel.level.machinery",
+      "semanticKind": "level",
+      "semanticRole": "machinery",
+      "displayName": "Machinery",
+      "parentSemanticId": "vessel.offshore-center-console",
+      "representation": {
+        "glbNodes": [
+          "CenterConsoleMachineryLevel"
+        ]
+      },
+      "interactionCapabilities": [
+        "selectable",
+        "highlightable",
+        "isolatable"
+      ]
+    },
+    {
+      "semanticId": "vessel.level.main-deck",
+      "semanticKind": "level",
+      "semanticRole": "main-deck",
+      "displayName": "Main Deck",
+      "parentSemanticId": "vessel.offshore-center-console",
+      "representation": {
+        "glbNodes": [
+          "CenterConsoleMainDeck"
+        ]
+      },
+      "interactionCapabilities": [
+        "selectable",
+        "highlightable",
+        "isolatable"
+      ]
+    },
+    {
+      "semanticId": "vessel.level.t-top",
+      "semanticKind": "level",
+      "semanticRole": "t-top",
+      "displayName": "T-Top",
+      "parentSemanticId": "vessel.offshore-center-console",
+      "representation": {
+        "glbNodes": [
+          "CenterConsoleTTopLevel"
+        ]
+      },
+      "interactionCapabilities": [
+        "selectable",
+        "highlightable",
+        "isolatable"
+      ]
+    },
+    {
+      "semanticId": "vessel.area.bilge-machinery",
+      "semanticKind": "area",
+      "semanticRole": "vessel-area",
+      "displayName": "Bilge / Machinery",
+      "parentSemanticId": "vessel.level.machinery",
+      "representation": {
+        "glbNodes": [
+          "CenterConsoleBilgeMachinery"
+        ]
+      },
+      "interactionCapabilities": [
+        "selectable",
+        "highlightable"
+      ],
+      "spatial": {
+        "placementRegions": [
+          {
+            "regionId": "low-point",
+            "displayName": "Bilge low point",
+            "regionKind": "placement-volume",
+            "transform": {
+              "position": [
+                0,
+                0.78,
+                -1.45
+              ]
+            },
+            "dimensions": [
+              1.8,
+              0.25,
+              1.1
+            ]
+          },
+          {
+            "regionId": "machinery",
+            "displayName": "Machinery service region",
+            "regionKind": "placement-volume",
+            "transform": {
+              "position": [
+                0,
+                0.85,
+                -1.45
+              ]
+            },
+            "dimensions": [
+              1.8,
+              0.35,
+              1.1
+            ]
+          }
+        ],
+        "placementAnchors": [
+          {
+            "anchorId": "bilge-low-center",
+            "displayName": "Bilge low center",
+            "transform": {
+              "position": [
+                0,
+                0.82,
+                -1.45
+              ]
+            },
+            "placementRegionId": "low-point"
+          },
+          {
+            "anchorId": "machinery-center",
+            "displayName": "Machinery center",
+            "transform": {
+              "position": [
+                0,
+                0.95,
+                -1.45
+              ]
+            },
+            "placementRegionId": "machinery"
+          }
+        ]
+      }
+    },
+    {
+      "semanticId": "vessel.area.outboard-machinery",
+      "semanticKind": "area",
+      "semanticRole": "vessel-area",
+      "displayName": "Outboard Machinery",
+      "parentSemanticId": "vessel.level.machinery",
+      "representation": {
+        "glbNodes": [
+          "CenterConsoleOutboardPortOuter",
+          "CenterConsoleOutboardPortInner",
+          "CenterConsoleOutboardStarboardInner",
+          "CenterConsoleOutboardStarboardOuter"
+        ]
+      },
+      "interactionCapabilities": [
+        "selectable",
+        "highlightable"
+      ],
+      "spatial": {
+        "placementRegions": [
+          {
+            "regionId": "propulsion",
+            "displayName": "Outboard propulsion",
+            "regionKind": "placement-volume",
+            "transform": {
+              "position": [
+                0,
+                0.65,
+                -4.55
+              ]
+            },
+            "dimensions": [
+              3.3,
+              1.4,
+              0.7
+            ]
+          }
+        ],
+        "placementAnchors": [
+          {
+            "anchorId": "port-outboard",
+            "displayName": "Port outboard",
+            "transform": {
+              "position": [
+                -1.35,
+                1.2,
+                -4.55
+              ]
+            },
+            "placementRegionId": "propulsion"
+          },
+          {
+            "anchorId": "starboard-outboard",
+            "displayName": "Starboard outboard",
+            "transform": {
+              "position": [
+                1.35,
+                1.2,
+                -4.55
+              ]
+            },
+            "placementRegionId": "propulsion"
+          }
+        ]
+      }
+    },
+    {
+      "semanticId": "vessel.area.bow",
+      "semanticKind": "area",
+      "semanticRole": "vessel-area",
+      "displayName": "Bow",
+      "parentSemanticId": "vessel.level.main-deck",
+      "representation": {
+        "glbNodes": [
+          "CenterConsoleBow"
+        ]
+      },
+      "interactionCapabilities": [
+        "selectable",
+        "highlightable"
+      ],
+      "spatial": {
+        "placementRegions": [
+          {
+            "regionId": "placement",
+            "displayName": "Bow placement",
+            "regionKind": "placement-volume",
+            "transform": {
+              "position": [
+                0,
+                2.7,
+                3.15
+              ]
+            },
+            "dimensions": [
+              3.8,
+              0.3,
+              2
+            ]
+          }
+        ],
+        "placementAnchors": [
+          {
+            "anchorId": "default",
+            "displayName": "Bow default",
+            "transform": {
+              "position": [
+                0,
+                2.7,
+                3.15
+              ]
+            },
+            "placementRegionId": "placement"
+          }
+        ]
+      }
+    },
+    {
+      "semanticId": "vessel.area.port-walk-deck",
+      "semanticKind": "area",
+      "semanticRole": "vessel-area",
+      "displayName": "Port Walk Deck",
+      "parentSemanticId": "vessel.level.main-deck",
+      "representation": {
+        "glbNodes": [
+          "CenterConsolePortWalkDeck"
+        ]
+      },
+      "interactionCapabilities": [
+        "selectable",
+        "highlightable"
+      ],
+      "spatial": {
+        "placementRegions": [
+          {
+            "regionId": "placement",
+            "displayName": "Port Walk Deck placement",
+            "regionKind": "placement-volume",
+            "transform": {
+              "position": [
+                -3.35,
+                2.65,
+                0.15
+              ]
+            },
+            "dimensions": [
+              0.8,
+              0.25,
+              5
+            ]
+          }
+        ],
+        "placementAnchors": [
+          {
+            "anchorId": "default",
+            "displayName": "Port Walk Deck default",
+            "transform": {
+              "position": [
+                -3.35,
+                2.65,
+                0.15
+              ]
+            },
+            "placementRegionId": "placement"
+          }
+        ]
+      }
+    },
+    {
+      "semanticId": "vessel.area.helm",
+      "semanticKind": "area",
+      "semanticRole": "vessel-area",
+      "displayName": "Helm",
+      "parentSemanticId": "vessel.level.main-deck",
+      "representation": {
+        "glbNodes": [
+          "CenterConsoleHelm"
+        ]
+      },
+      "interactionCapabilities": [
+        "selectable",
+        "highlightable"
+      ],
+      "spatial": {
+        "placementRegions": [
+          {
+            "regionId": "console",
+            "displayName": "Helm console",
+            "regionKind": "placement-volume",
+            "transform": {
+              "position": [
+                0,
+                3.05,
+                0.15
+              ]
+            },
+            "dimensions": [
+              1.8,
+              0.8,
+              1.2
+            ]
+          },
+          {
+            "regionId": "overhead",
+            "displayName": "Helm overhead",
+            "regionKind": "placement-volume",
+            "transform": {
+              "position": [
+                0,
+                4,
+                0.15
+              ]
+            },
+            "dimensions": [
+              2.5,
+              0.2,
+              1.8
+            ]
+          },
+          {
+            "regionId": "operator",
+            "displayName": "Helm operator",
+            "regionKind": "placement-volume",
+            "transform": {
+              "position": [
+                0,
+                2.7,
+                -0.7
+              ]
+            },
+            "dimensions": [
+              1.6,
+              0.5,
+              0.9
+            ]
+          }
+        ],
+        "placementAnchors": [
+          {
+            "anchorId": "helm-console",
+            "displayName": "Helm console",
+            "transform": {
+              "position": [
+                0,
+                3.2,
+                0.15
+              ]
+            },
+            "placementRegionId": "console"
+          },
+          {
+            "anchorId": "helm-overhead",
+            "displayName": "Helm overhead",
+            "transform": {
+              "position": [
+                0,
+                3.85,
+                0.15
+              ]
+            },
+            "placementRegionId": "overhead"
+          },
+          {
+            "anchorId": "helm-port",
+            "displayName": "Helm port",
+            "transform": {
+              "position": [
+                -0.75,
+                3.1,
+                0.15
+              ]
+            },
+            "placementRegionId": "console"
+          },
+          {
+            "anchorId": "helm-starboard",
+            "displayName": "Helm starboard",
+            "transform": {
+              "position": [
+                0.75,
+                3.1,
+                0.15
+              ]
+            },
+            "placementRegionId": "console"
+          }
+        ]
+      }
+    },
+    {
+      "semanticId": "vessel.area.starboard-walk-deck",
+      "semanticKind": "area",
+      "semanticRole": "vessel-area",
+      "displayName": "Starboard Walk Deck",
+      "parentSemanticId": "vessel.level.main-deck",
+      "representation": {
+        "glbNodes": [
+          "CenterConsoleStarboardWalkDeck"
+        ]
+      },
+      "interactionCapabilities": [
+        "selectable",
+        "highlightable"
+      ],
+      "spatial": {
+        "placementRegions": [
+          {
+            "regionId": "placement",
+            "displayName": "Starboard Walk Deck placement",
+            "regionKind": "placement-volume",
+            "transform": {
+              "position": [
+                3.35,
+                2.65,
+                0.15
+              ]
+            },
+            "dimensions": [
+              0.8,
+              0.25,
+              5
+            ]
+          }
+        ],
+        "placementAnchors": [
+          {
+            "anchorId": "default",
+            "displayName": "Starboard Walk Deck default",
+            "transform": {
+              "position": [
+                3.35,
+                2.65,
+                0.15
+              ]
+            },
+            "placementRegionId": "placement"
+          }
+        ]
+      }
+    },
+    {
+      "semanticId": "vessel.area.cockpit",
+      "semanticKind": "area",
+      "semanticRole": "vessel-area",
+      "displayName": "Cockpit",
+      "parentSemanticId": "vessel.level.main-deck",
+      "representation": {
+        "glbNodes": [
+          "CenterConsoleCockpit"
+        ]
+      },
+      "interactionCapabilities": [
+        "selectable",
+        "highlightable"
+      ],
+      "spatial": {
+        "placementRegions": [
+          {
+            "regionId": "placement",
+            "displayName": "Cockpit placement",
+            "regionKind": "placement-volume",
+            "transform": {
+              "position": [
+                0,
+                2.7,
+                -3.1
+              ]
+            },
+            "dimensions": [
+              4.8,
+              0.3,
+              2
+            ]
+          }
+        ],
+        "placementAnchors": [
+          {
+            "anchorId": "default",
+            "displayName": "Cockpit default",
+            "transform": {
+              "position": [
+                0,
+                2.7,
+                -3.1
+              ]
+            },
+            "placementRegionId": "placement"
+          }
+        ]
+      }
+    },
+    {
+      "semanticId": "vessel.area.t-top-overhead",
+      "semanticKind": "area",
+      "semanticRole": "vessel-area",
+      "displayName": "T-Top / Overhead",
+      "parentSemanticId": "vessel.level.t-top",
+      "representation": {
+        "glbNodes": [
+          "CenterConsoleTTopOverhead"
+        ]
+      },
+      "interactionCapabilities": [
+        "selectable",
+        "highlightable"
+      ],
+      "spatial": {
+        "placementRegions": [
+          {
+            "regionId": "upper-surface",
+            "displayName": "T-Top upper surface",
+            "regionKind": "placement-volume",
+            "transform": {
+              "position": [
+                0,
+                4.45,
+                0.1
+              ]
+            },
+            "dimensions": [
+              3.5,
+              0.2,
+              2.2
+            ]
+          },
+          {
+            "regionId": "underside",
+            "displayName": "T-Top underside",
+            "regionKind": "placement-volume",
+            "transform": {
+              "position": [
+                0,
+                3.95,
+                0.1
+              ]
+            },
+            "dimensions": [
+              3.5,
+              0.2,
+              2.2
+            ]
+          }
+        ],
+        "placementAnchors": [
+          {
+            "anchorId": "t-top-forward-center",
+            "displayName": "T-Top forward center",
+            "transform": {
+              "position": [
+                0,
+                4.45,
+                0.75
+              ]
+            },
+            "placementRegionId": "upper-surface"
+          },
+          {
+            "anchorId": "t-top-aft-center",
+            "displayName": "T-Top aft center",
+            "transform": {
+              "position": [
+                0,
+                4.45,
+                -0.55
+              ]
+            },
+            "placementRegionId": "upper-surface"
+          },
+          {
+            "anchorId": "t-top-port",
+            "displayName": "T-Top port",
+            "transform": {
+              "position": [
+                -1.35,
+                4.3,
+                0.1
+              ]
+            },
+            "placementRegionId": "underside"
+          },
+          {
+            "anchorId": "t-top-starboard",
+            "displayName": "T-Top starboard",
+            "transform": {
+              "position": [
+                1.35,
+                4.3,
+                0.1
+              ]
+            },
+            "placementRegionId": "underside"
+          }
+        ]
+      }
+    }
+  ],
+  "modelReferences": []
+}
