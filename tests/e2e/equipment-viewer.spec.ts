@@ -10,8 +10,13 @@ test("renders the Center Console vessel and places cross-level capabilities", as
     }
   })
 
-  await page.goto("/?model=offshore-center-console", {
-    waitUntil: "domcontentloaded",
+  await page.goto("/", { waitUntil: "domcontentloaded" })
+  await expect(
+    page.getByRole("heading", { name: "Hatteras 63 Motor Yacht" }),
+  ).toBeVisible()
+
+  await page.getByRole("combobox", { name: "Hull" }).selectOption({
+    label: "Offshore Center Console",
   })
   await expect(
     page.getByRole("heading", { name: "Offshore Center Console" }),

@@ -22,6 +22,7 @@ describe("model API", () => {
       modelVersion: "0.1.0",
     })
     expect(centerConsole).toMatchObject({
+      displayName: "Offshore Center Console",
       modelKind: "vessel",
       modelVersion: "0.1.0",
     })

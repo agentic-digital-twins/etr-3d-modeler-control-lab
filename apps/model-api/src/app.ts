@@ -72,6 +72,10 @@ export async function createApp(): Promise<Express> {
         modelId: manifest.modelId,
         modelKind: manifest.modelKind,
         modelVersion: manifest.modelVersion,
+        displayName:
+          manifest.semanticNodes.find(
+            (semanticNode) => semanticNode.semanticKind === "vessel",
+          )?.displayName ?? manifest.modelKind,
       })),
     )
   })

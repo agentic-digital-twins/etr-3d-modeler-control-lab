@@ -122,12 +122,28 @@ const manifest = {
     },
   ],
 }
+const catalog = [
+  {
+    modelId: "hatteras-63-motor-yacht-prototype",
+    displayName: "Hatteras 63 Motor Yacht",
+  },
+  {
+    modelId: "offshore-center-console",
+    displayName: "Offshore Center Console",
+  },
+]
 
 describe("Spatial Model Explorer", () => {
   beforeEach(() => {
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockResolvedValue({ ok: true, json: async () => manifest }),
+      vi.fn().mockImplementation((input: string) =>
+        Promise.resolve({
+          ok: true,
+          json: async () =>
+            input.endsWith("/api/models") ? catalog : manifest,
+        }),
+      ),
     )
   })
 
@@ -135,6 +151,9 @@ describe("Spatial Model Explorer", () => {
     render(<App />)
 
     await screen.findByRole("heading", { name: "Hatteras 63 Motor Yacht" })
+    expect(
+      screen.getByRole("option", { name: "Offshore Center Console" }),
+    ).toBeTruthy()
     fireEvent.click(screen.getByRole("button", { name: "Level: Flybridge" }))
     expect(screen.getByText("LEVEL")).toBeTruthy()
     fireEvent.click(screen.getByRole("button", { name: "Area: Flybridge" }))
