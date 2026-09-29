@@ -46,11 +46,17 @@ test("renders the Hatteras vessel and places runtime capabilities", async ({
   }, screenshot.toString("base64"))
   expect(hasModelPixel).toBe(true)
 
-  await page.getByRole("button", { name: "Flybridge" }).click()
+  await expect(
+    page.getByRole("button", { name: "Level: Main Deck" }),
+  ).toBeVisible()
+  await page.getByRole("button", { name: "Level: Main Deck" }).click()
+  await expect(page.getByText("LEVEL", { exact: true })).toBeVisible()
+  await page.getByRole("button", { name: "Area: Flybridge" }).click()
+  await expect(page.getByText("AREA", { exact: true })).toBeVisible()
   await page.getByRole("button", { name: "Add capability" }).click()
   await expect(page.getByText("Thermal Camera · Flybridge")).toBeVisible()
   await page.getByRole("button", { name: "Water Sensor" }).click()
-  await page.getByRole("button", { name: "Engine Room" }).click()
+  await page.getByRole("button", { name: "Area: Engine Room" }).click()
   await page.getByRole("button", { name: "Add capability" }).click()
   await expect(page.getByText("Water Sensor · Engine Room")).toBeVisible()
   expect(consoleErrors).toEqual([])

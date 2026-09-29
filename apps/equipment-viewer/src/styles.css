@@ -85,6 +85,27 @@ h2 {
   flex-wrap: wrap;
   gap: 0.5rem;
 }
+.spatial-structure {
+  display: grid;
+  gap: 0.75rem;
+}
+.level-entry {
+  display: grid;
+  gap: 0.4rem;
+}
+.level-entry > button {
+  font-weight: 600;
+  text-align: left;
+}
+.area-list {
+  display: grid;
+  gap: 0.35rem;
+  padding-left: 0.8rem;
+}
+.area-list button {
+  font-size: 0.9rem;
+  text-align: left;
+}
 .placement-list {
   display: grid;
   gap: 0.4rem;
