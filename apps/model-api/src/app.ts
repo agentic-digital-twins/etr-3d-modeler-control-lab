@@ -41,6 +41,16 @@ const fixtures = [
       "fixtures/spatial-models/offshore-center-console.glb",
     ),
   },
+  {
+    manifestPath: resolve(
+      repositoryRoot,
+      "fixtures/spatial-models/convertible-sportfish.manifest.json",
+    ),
+    artifactPath: resolve(
+      repositoryRoot,
+      "fixtures/spatial-models/convertible-sportfish.glb",
+    ),
+  },
 ]
 
 type ValidatedModel = {

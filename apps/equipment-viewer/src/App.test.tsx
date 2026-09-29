@@ -131,6 +131,10 @@ const catalog = [
     modelId: "offshore-center-console",
     displayName: "Offshore Center Console",
   },
+  {
+    modelId: "convertible-sportfish",
+    displayName: "Convertible Sportfish",
+  },
 ]
 
 describe("Spatial Model Explorer", () => {
@@ -153,6 +157,9 @@ describe("Spatial Model Explorer", () => {
     await screen.findByRole("heading", { name: "Hatteras 63 Motor Yacht" })
     expect(
       screen.getByRole("option", { name: "Offshore Center Console" }),
+    ).toBeTruthy()
+    expect(
+      screen.getByRole("option", { name: "Convertible Sportfish" }),
     ).toBeTruthy()
     fireEvent.click(screen.getByRole("button", { name: "Level: Flybridge" }))
     expect(screen.getByText("LEVEL")).toBeTruthy()
