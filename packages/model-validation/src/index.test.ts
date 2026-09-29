@@ -21,6 +21,7 @@ const hatterasFixtureDirectory = join(
   "../../../fixtures/spatial-models",
 )
 const centerConsoleFixtureDirectory = hatterasFixtureDirectory
+const sportfishFixtureDirectory = hatterasFixtureDirectory
 const temporaryDirectories: string[] = []
 
 async function createFixture(): Promise<{
@@ -130,6 +131,23 @@ describe("validateModel", () => {
           (node) => node.semanticKind === "level",
         ),
       ).toHaveLength(3)
+    }
+  })
+
+  it("accepts the checked-in Sportfish vessel fixture", async () => {
+    const report = await validateModel(
+      join(sportfishFixtureDirectory, "convertible-sportfish.manifest.json"),
+      join(sportfishFixtureDirectory, "convertible-sportfish.glb"),
+    )
+
+    expect(report).toMatchObject({ valid: true })
+    if (report.valid) {
+      expect(report.manifest.modelId).toBe("convertible-sportfish")
+      expect(
+        report.manifest.semanticNodes.filter(
+          (node) => node.semanticKind === "level",
+        ),
+      ).toHaveLength(4)
     }
   })
 

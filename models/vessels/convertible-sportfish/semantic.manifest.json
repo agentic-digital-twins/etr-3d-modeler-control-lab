@@ -1,0 +1,819 @@
+{
+  "modelId": "convertible-sportfish",
+  "modelKind": "vessel",
+  "modelProfile": "vessel",
+  "modelVersion": "0.1.0",
+  "subject": {
+    "subjectId": "vessel-model:convertible-sportfish",
+    "subjectKind": "vessel-model"
+  },
+  "artifact": {
+    "artifactId": "convertible-sportfish-fixture",
+    "artifactVersion": "0.1.0",
+    "fileName": "convertible-sportfish.glb",
+    "contentFingerprint": "sha256:8add7a5de24863c6ceb4c8879745f7ef5928f943cabba6cfc85d40ff253377e5"
+  },
+  "generator": {
+    "name": "phase-2-sportfish-fixture-generator",
+    "version": "0.1.0",
+    "sourceRevision": "phase-2-slice-3"
+  },
+  "sourceReferences": [],
+  "coordinateFrame": "right-handed-y-up",
+  "placementCoordinateFrame": "model",
+  "units": "meters",
+  "createdAt": "2026-09-29T00:00:00.000Z",
+  "generatedAt": "2026-09-29T00:00:00.000Z",
+  "exportedAt": "2026-09-29T00:00:00.000Z",
+  "validatedAt": "2026-09-29T00:00:00.000Z",
+  "semanticNodes": [
+    {
+      "semanticId": "vessel.convertible-sportfish",
+      "semanticKind": "vessel",
+      "semanticRole": "convertible-sportfish",
+      "displayName": "Convertible Sportfish",
+      "representation": {
+        "glbNodes": [
+          "SportfishHull",
+          "SportfishFlaredBow",
+          "SportfishEnclosedHouse"
+        ]
+      },
+      "interactionCapabilities": [
+        "selectable"
+      ]
+    },
+    {
+      "semanticId": "vessel.level.machinery",
+      "semanticKind": "level",
+      "semanticRole": "machinery",
+      "displayName": "Machinery",
+      "parentSemanticId": "vessel.convertible-sportfish",
+      "representation": {
+        "glbNodes": [
+          "SportfishMachineryLevel"
+        ]
+      },
+      "interactionCapabilities": [
+        "selectable",
+        "highlightable",
+        "isolatable"
+      ]
+    },
+    {
+      "semanticId": "vessel.level.accommodation",
+      "semanticKind": "level",
+      "semanticRole": "accommodation",
+      "displayName": "Accommodation",
+      "parentSemanticId": "vessel.convertible-sportfish",
+      "representation": {
+        "glbNodes": [
+          "SportfishAccommodationLevel"
+        ]
+      },
+      "interactionCapabilities": [
+        "selectable",
+        "highlightable",
+        "isolatable"
+      ]
+    },
+    {
+      "semanticId": "vessel.level.main-deck",
+      "semanticKind": "level",
+      "semanticRole": "main-deck",
+      "displayName": "Main Deck",
+      "parentSemanticId": "vessel.convertible-sportfish",
+      "representation": {
+        "glbNodes": [
+          "SportfishMainDeck"
+        ]
+      },
+      "interactionCapabilities": [
+        "selectable",
+        "highlightable",
+        "isolatable"
+      ]
+    },
+    {
+      "semanticId": "vessel.level.bridge",
+      "semanticKind": "level",
+      "semanticRole": "bridge",
+      "displayName": "Bridge",
+      "parentSemanticId": "vessel.convertible-sportfish",
+      "representation": {
+        "glbNodes": [
+          "SportfishBridgeLevel"
+        ]
+      },
+      "interactionCapabilities": [
+        "selectable",
+        "highlightable",
+        "isolatable"
+      ]
+    },
+    {
+      "semanticId": "vessel.area.engine-room",
+      "semanticKind": "area",
+      "semanticRole": "vessel-area",
+      "displayName": "Engine Room",
+      "parentSemanticId": "vessel.level.machinery",
+      "representation": {
+        "glbNodes": [
+          "SportfishEngineRoom"
+        ]
+      },
+      "interactionCapabilities": [
+        "selectable",
+        "highlightable"
+      ],
+      "spatial": {
+        "placementRegions": [
+          {
+            "regionId": "machinery",
+            "displayName": "Engine room machinery",
+            "regionKind": "placement-volume",
+            "transform": {
+              "position": [
+                0,
+                1.05,
+                -1.7
+              ]
+            },
+            "dimensions": [
+              3.5,
+              0.6,
+              1.8
+            ]
+          },
+          {
+            "regionId": "low-point",
+            "displayName": "Engine room low point",
+            "regionKind": "placement-volume",
+            "transform": {
+              "position": [
+                0,
+                0.8,
+                -1.7
+              ]
+            },
+            "dimensions": [
+              3.5,
+              0.2,
+              1.8
+            ]
+          }
+        ],
+        "placementAnchors": [
+          {
+            "anchorId": "machinery-center",
+            "displayName": "Machinery center",
+            "transform": {
+              "position": [
+                0,
+                1.2,
+                -1.7
+              ]
+            },
+            "placementRegionId": "machinery"
+          },
+          {
+            "anchorId": "machinery-port",
+            "displayName": "Machinery port",
+            "transform": {
+              "position": [
+                -1.25,
+                1.1,
+                -1.7
+              ]
+            },
+            "placementRegionId": "machinery"
+          },
+          {
+            "anchorId": "machinery-starboard",
+            "displayName": "Machinery starboard",
+            "transform": {
+              "position": [
+                1.25,
+                1.1,
+                -1.7
+              ]
+            },
+            "placementRegionId": "machinery"
+          },
+          {
+            "anchorId": "low-point-center",
+            "displayName": "Low point center",
+            "transform": {
+              "position": [
+                0,
+                0.85,
+                -1.7
+              ]
+            },
+            "placementRegionId": "low-point"
+          }
+        ]
+      }
+    },
+    {
+      "semanticId": "vessel.area.forward-stateroom",
+      "semanticKind": "area",
+      "semanticRole": "vessel-area",
+      "displayName": "Forward Stateroom",
+      "parentSemanticId": "vessel.level.accommodation",
+      "representation": {
+        "glbNodes": [
+          "SportfishForwardStateroom"
+        ]
+      },
+      "interactionCapabilities": [
+        "selectable",
+        "highlightable"
+      ],
+      "spatial": {
+        "placementRegions": [
+          {
+            "regionId": "interior",
+            "displayName": "Forward Stateroom interior",
+            "regionKind": "placement-volume",
+            "transform": {
+              "position": [
+                0,
+                2.2,
+                3.45
+              ]
+            },
+            "dimensions": [
+              3,
+              0.4,
+              2
+            ]
+          }
+        ],
+        "placementAnchors": [
+          {
+            "anchorId": "default",
+            "displayName": "Forward Stateroom default",
+            "transform": {
+              "position": [
+                0,
+                2.2,
+                3.45
+              ]
+            },
+            "placementRegionId": "interior"
+          }
+        ]
+      }
+    },
+    {
+      "semanticId": "vessel.area.galley",
+      "semanticKind": "area",
+      "semanticRole": "vessel-area",
+      "displayName": "Galley",
+      "parentSemanticId": "vessel.level.accommodation",
+      "representation": {
+        "glbNodes": [
+          "SportfishGalley"
+        ]
+      },
+      "interactionCapabilities": [
+        "selectable",
+        "highlightable"
+      ],
+      "spatial": {
+        "placementRegions": [
+          {
+            "regionId": "interior",
+            "displayName": "Galley interior",
+            "regionKind": "placement-volume",
+            "transform": {
+              "position": [
+                -1.85,
+                2.12,
+                0.8
+              ]
+            },
+            "dimensions": [
+              2.2,
+              0.35,
+              1.5
+            ]
+          }
+        ],
+        "placementAnchors": [
+          {
+            "anchorId": "default",
+            "displayName": "Galley default",
+            "transform": {
+              "position": [
+                -1.85,
+                2.12,
+                0.8
+              ]
+            },
+            "placementRegionId": "interior"
+          }
+        ]
+      }
+    },
+    {
+      "semanticId": "vessel.area.salon",
+      "semanticKind": "area",
+      "semanticRole": "vessel-area",
+      "displayName": "Salon",
+      "parentSemanticId": "vessel.level.accommodation",
+      "representation": {
+        "glbNodes": [
+          "SportfishSalon"
+        ]
+      },
+      "interactionCapabilities": [
+        "selectable",
+        "highlightable"
+      ],
+      "spatial": {
+        "placementRegions": [
+          {
+            "regionId": "interior",
+            "displayName": "Salon interior",
+            "regionKind": "placement-volume",
+            "transform": {
+              "position": [
+                0,
+                2.3,
+                -1.45
+              ]
+            },
+            "dimensions": [
+              4.7,
+              0.45,
+              1.9
+            ]
+          }
+        ],
+        "placementAnchors": [
+          {
+            "anchorId": "default",
+            "displayName": "Salon default",
+            "transform": {
+              "position": [
+                0,
+                2.3,
+                -1.45
+              ]
+            },
+            "placementRegionId": "interior"
+          }
+        ]
+      }
+    },
+    {
+      "semanticId": "vessel.area.guest-stateroom",
+      "semanticKind": "area",
+      "semanticRole": "vessel-area",
+      "displayName": "Guest Stateroom",
+      "parentSemanticId": "vessel.level.accommodation",
+      "representation": {
+        "glbNodes": [
+          "SportfishGuestStateroom"
+        ]
+      },
+      "interactionCapabilities": [
+        "selectable",
+        "highlightable"
+      ],
+      "spatial": {
+        "placementRegions": [
+          {
+            "regionId": "interior",
+            "displayName": "Guest Stateroom interior",
+            "regionKind": "placement-volume",
+            "transform": {
+              "position": [
+                1.85,
+                2.2,
+                0.8
+              ]
+            },
+            "dimensions": [
+              2.2,
+              0.4,
+              1.5
+            ]
+          }
+        ],
+        "placementAnchors": [
+          {
+            "anchorId": "default",
+            "displayName": "Guest Stateroom default",
+            "transform": {
+              "position": [
+                1.85,
+                2.2,
+                0.8
+              ]
+            },
+            "placementRegionId": "interior"
+          }
+        ]
+      }
+    },
+    {
+      "semanticId": "vessel.area.bow-foredeck",
+      "semanticKind": "area",
+      "semanticRole": "vessel-area",
+      "displayName": "Bow / Foredeck",
+      "parentSemanticId": "vessel.level.main-deck",
+      "representation": {
+        "glbNodes": [
+          "SportfishBowForedeck"
+        ]
+      },
+      "interactionCapabilities": [
+        "selectable",
+        "highlightable"
+      ],
+      "spatial": {
+        "placementRegions": [
+          {
+            "regionId": "interior",
+            "displayName": "Bow / Foredeck interior",
+            "regionKind": "placement-volume",
+            "transform": {
+              "position": [
+                0,
+                3.6,
+                4.65
+              ]
+            },
+            "dimensions": [
+              5,
+              0.3,
+              2.4
+            ]
+          }
+        ],
+        "placementAnchors": [
+          {
+            "anchorId": "default",
+            "displayName": "Bow / Foredeck default",
+            "transform": {
+              "position": [
+                0,
+                3.6,
+                4.65
+              ]
+            },
+            "placementRegionId": "interior"
+          }
+        ]
+      }
+    },
+    {
+      "semanticId": "vessel.area.port-side-deck",
+      "semanticKind": "area",
+      "semanticRole": "vessel-area",
+      "displayName": "Port Side Deck",
+      "parentSemanticId": "vessel.level.main-deck",
+      "representation": {
+        "glbNodes": [
+          "SportfishPortSideDeck"
+        ]
+      },
+      "interactionCapabilities": [
+        "selectable",
+        "highlightable"
+      ],
+      "spatial": {
+        "placementRegions": [
+          {
+            "regionId": "interior",
+            "displayName": "Port Side Deck interior",
+            "regionKind": "placement-volume",
+            "transform": {
+              "position": [
+                -4.45,
+                3.45,
+                0.45
+              ]
+            },
+            "dimensions": [
+              0.8,
+              0.25,
+              6
+            ]
+          }
+        ],
+        "placementAnchors": [
+          {
+            "anchorId": "default",
+            "displayName": "Port Side Deck default",
+            "transform": {
+              "position": [
+                -4.45,
+                3.45,
+                0.45
+              ]
+            },
+            "placementRegionId": "interior"
+          }
+        ]
+      }
+    },
+    {
+      "semanticId": "vessel.area.starboard-side-deck",
+      "semanticKind": "area",
+      "semanticRole": "vessel-area",
+      "displayName": "Starboard Side Deck",
+      "parentSemanticId": "vessel.level.main-deck",
+      "representation": {
+        "glbNodes": [
+          "SportfishStarboardSideDeck"
+        ]
+      },
+      "interactionCapabilities": [
+        "selectable",
+        "highlightable"
+      ],
+      "spatial": {
+        "placementRegions": [
+          {
+            "regionId": "interior",
+            "displayName": "Starboard Side Deck interior",
+            "regionKind": "placement-volume",
+            "transform": {
+              "position": [
+                4.45,
+                3.45,
+                0.45
+              ]
+            },
+            "dimensions": [
+              0.8,
+              0.25,
+              6
+            ]
+          }
+        ],
+        "placementAnchors": [
+          {
+            "anchorId": "default",
+            "displayName": "Starboard Side Deck default",
+            "transform": {
+              "position": [
+                4.45,
+                3.45,
+                0.45
+              ]
+            },
+            "placementRegionId": "interior"
+          }
+        ]
+      }
+    },
+    {
+      "semanticId": "vessel.area.cockpit",
+      "semanticKind": "area",
+      "semanticRole": "vessel-area",
+      "displayName": "Cockpit",
+      "parentSemanticId": "vessel.level.main-deck",
+      "representation": {
+        "glbNodes": [
+          "SportfishCockpit"
+        ]
+      },
+      "interactionCapabilities": [
+        "selectable",
+        "highlightable"
+      ],
+      "spatial": {
+        "placementRegions": [
+          {
+            "regionId": "deck",
+            "displayName": "Cockpit deck",
+            "regionKind": "placement-volume",
+            "transform": {
+              "position": [
+                0,
+                3.6,
+                -4.35
+              ]
+            },
+            "dimensions": [
+              6,
+              0.3,
+              2.5
+            ]
+          },
+          {
+            "regionId": "transom",
+            "displayName": "Cockpit transom",
+            "regionKind": "placement-volume",
+            "transform": {
+              "position": [
+                0,
+                3.75,
+                -5.55
+              ]
+            },
+            "dimensions": [
+              5.5,
+              0.5,
+              0.35
+            ]
+          },
+          {
+            "regionId": "overhead",
+            "displayName": "Cockpit overhead",
+            "regionKind": "placement-volume",
+            "transform": {
+              "position": [
+                0,
+                4.7,
+                -4.35
+              ]
+            },
+            "dimensions": [
+              5.5,
+              0.25,
+              2.5
+            ]
+          }
+        ],
+        "placementAnchors": [
+          {
+            "anchorId": "cockpit-center",
+            "displayName": "Cockpit center",
+            "transform": {
+              "position": [
+                0,
+                3.75,
+                -4.35
+              ]
+            },
+            "placementRegionId": "deck"
+          },
+          {
+            "anchorId": "cockpit-port",
+            "displayName": "Cockpit port",
+            "transform": {
+              "position": [
+                -2.1,
+                3.75,
+                -4.35
+              ]
+            },
+            "placementRegionId": "deck"
+          },
+          {
+            "anchorId": "cockpit-starboard",
+            "displayName": "Cockpit starboard",
+            "transform": {
+              "position": [
+                2.1,
+                3.75,
+                -4.35
+              ]
+            },
+            "placementRegionId": "deck"
+          },
+          {
+            "anchorId": "transom-center",
+            "displayName": "Transom center",
+            "transform": {
+              "position": [
+                0,
+                3.9,
+                -5.55
+              ]
+            },
+            "placementRegionId": "transom"
+          }
+        ]
+      }
+    },
+    {
+      "semanticId": "vessel.area.flybridge-helm",
+      "semanticKind": "area",
+      "semanticRole": "vessel-area",
+      "displayName": "Flybridge / Helm",
+      "parentSemanticId": "vessel.level.bridge",
+      "representation": {
+        "glbNodes": [
+          "SportfishFlybridgeHelm"
+        ]
+      },
+      "interactionCapabilities": [
+        "selectable",
+        "highlightable"
+      ],
+      "spatial": {
+        "placementRegions": [
+          {
+            "regionId": "helm",
+            "displayName": "Bridge helm",
+            "regionKind": "placement-volume",
+            "transform": {
+              "position": [
+                0,
+                6.1,
+                -0.05
+              ]
+            },
+            "dimensions": [
+              2.8,
+              0.7,
+              1.8
+            ]
+          },
+          {
+            "regionId": "overhead",
+            "displayName": "Bridge overhead",
+            "regionKind": "placement-volume",
+            "transform": {
+              "position": [
+                0,
+                6.6,
+                -0.05
+              ]
+            },
+            "dimensions": [
+              3.4,
+              0.2,
+              2.2
+            ]
+          },
+          {
+            "regionId": "perimeter",
+            "displayName": "Bridge perimeter",
+            "regionKind": "placement-volume",
+            "transform": {
+              "position": [
+                0,
+                6,
+                -0.05
+              ]
+            },
+            "dimensions": [
+              4,
+              0.3,
+              2.8
+            ]
+          }
+        ],
+        "placementAnchors": [
+          {
+            "anchorId": "helm-center",
+            "displayName": "Helm center",
+            "transform": {
+              "position": [
+                0,
+                6.2,
+                -0.05
+              ]
+            },
+            "placementRegionId": "helm"
+          },
+          {
+            "anchorId": "overhead-center",
+            "displayName": "Overhead center",
+            "transform": {
+              "position": [
+                0,
+                6.55,
+                -0.05
+              ]
+            },
+            "placementRegionId": "overhead"
+          },
+          {
+            "anchorId": "bridge-port",
+            "displayName": "Bridge port",
+            "transform": {
+              "position": [
+                -1.45,
+                6.15,
+                -0.05
+              ]
+            },
+            "placementRegionId": "perimeter"
+          },
+          {
+            "anchorId": "bridge-starboard",
+            "displayName": "Bridge starboard",
+            "transform": {
+              "position": [
+                1.45,
+                6.15,
+                -0.05
+              ]
+            },
+            "placementRegionId": "perimeter"
+          }
+        ]
+      }
+    }
+  ],
+  "modelReferences": []
+}
