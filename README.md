@@ -25,7 +25,7 @@ For local inspection, run the coordinated launcher:
 pnpm run run:local
 ```
 
-It starts the API and browser server, checks their health, and prints the usable URLs. The browser uses same-origin `/api` requests; the viewer server proxies them to the local API, so a browser on another NUC-network device does not need to resolve `localhost`.
+It stops listeners already using the configured API/viewer ports, starts the API and browser server, checks their health, and prints the launch URL. The browser uses same-origin `/api` requests; the viewer server proxies them to the local API, so a browser on another NUC-network device does not need to resolve `localhost`.
 
 See [api-local-browser-env-port-operational-map.md](docs/architecture/api-local-browser-env-port-operational-map.md) for environment ownership, allocated ports, and NUC deployment.
 
