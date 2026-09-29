@@ -109,6 +109,9 @@ function validateVesselProfile(
   }
 
   const vessel = vessels[0]
+  if (vessel.parentSemanticId) {
+    errors.push(`Vessel semantic node must be root-level: ${vessel.semanticId}`)
+  }
   const levelIds = new Set(
     manifest.semanticNodes
       .filter((node) => node.semanticKind === "level")

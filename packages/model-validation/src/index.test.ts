@@ -140,6 +140,26 @@ describe("validateModel", () => {
     }
   })
 
+  it("rejects a vessel semantic node that is not root-level", async () => {
+    const { manifestPath, artifactPath } = await createHatterasFixture()
+    await mutateManifest(manifestPath, (manifest) => {
+      const vessel = manifest.semanticNodes.find(
+        (node: { semanticId: string }) =>
+          node.semanticId === "vessel.hatteras-63",
+      )
+      vessel.parentSemanticId = "vessel.level.main-deck"
+    })
+
+    const report = await validateModel(manifestPath, artifactPath)
+
+    expect(report).toMatchObject({ valid: false })
+    if (!report.valid) {
+      expect(report.errors).toContain(
+        "Vessel semantic node must be root-level: vessel.hatteras-63",
+      )
+    }
+  })
+
   it("rejects an unsupported placement coordinate frame", async () => {
     const { manifestPath, artifactPath } = await createFixture()
     await mutateManifest(manifestPath, (manifest) => {
