@@ -22,6 +22,7 @@ const hatterasFixtureDirectory = join(
 )
 const centerConsoleFixtureDirectory = hatterasFixtureDirectory
 const sportfishFixtureDirectory = hatterasFixtureDirectory
+const superyachtFixtureDirectory = hatterasFixtureDirectory
 const temporaryDirectories: string[] = []
 
 async function createFixture(): Promise<{
@@ -148,6 +149,28 @@ describe("validateModel", () => {
           (node) => node.semanticKind === "level",
         ),
       ).toHaveLength(4)
+    }
+  })
+
+  it("accepts the checked-in Superyacht vessel fixture", async () => {
+    const report = await validateModel(
+      join(superyachtFixtureDirectory, "tri-deck-superyacht.manifest.json"),
+      join(superyachtFixtureDirectory, "tri-deck-superyacht.glb"),
+    )
+
+    expect(report).toMatchObject({ valid: true })
+    if (report.valid) {
+      const levels = report.manifest.semanticNodes.filter(
+        (node) => node.semanticKind === "level",
+      )
+      const sunDeck = report.manifest.semanticNodes.find(
+        (node) => node.semanticId === "vessel.area.sun-deck",
+      )
+      expect(levels).toHaveLength(6)
+      expect(sunDeck).toMatchObject({
+        displayName: "Sun Deck",
+        parentSemanticId: "vessel.level.sun-deck",
+      })
     }
   })
 

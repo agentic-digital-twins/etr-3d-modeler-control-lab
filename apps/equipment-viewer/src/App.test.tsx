@@ -135,6 +135,10 @@ const catalog = [
     modelId: "convertible-sportfish",
     displayName: "Convertible Sportfish",
   },
+  {
+    modelId: "tri-deck-superyacht",
+    displayName: "Tri-Deck Superyacht",
+  },
 ]
 
 describe("Spatial Model Explorer", () => {
@@ -160,6 +164,9 @@ describe("Spatial Model Explorer", () => {
     ).toBeTruthy()
     expect(
       screen.getByRole("option", { name: "Convertible Sportfish" }),
+    ).toBeTruthy()
+    expect(
+      screen.getByRole("option", { name: "Tri-Deck Superyacht" }),
     ).toBeTruthy()
     fireEvent.click(screen.getByRole("button", { name: "Level: Flybridge" }))
     expect(screen.getByText("LEVEL")).toBeTruthy()

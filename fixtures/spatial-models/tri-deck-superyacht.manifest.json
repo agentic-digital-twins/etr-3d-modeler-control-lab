@@ -1,0 +1,762 @@
+{
+  "modelId": "tri-deck-superyacht",
+  "modelKind": "vessel",
+  "modelProfile": "vessel",
+  "modelVersion": "0.1.0",
+  "subject": {
+    "subjectId": "vessel-model:tri-deck-superyacht",
+    "subjectKind": "vessel-model"
+  },
+  "artifact": {
+    "artifactId": "tri-deck-superyacht-fixture",
+    "artifactVersion": "0.1.0",
+    "fileName": "tri-deck-superyacht.glb",
+    "contentFingerprint": "sha256:575098d4c1c502f9f6474d19856aa4cecf50e5495b93ef4f01c7c6de7e7e0087"
+  },
+  "generator": {
+    "name": "phase-2-superyacht-fixture-generator",
+    "version": "0.1.0",
+    "sourceRevision": "phase-2-slice-4"
+  },
+  "sourceReferences": [],
+  "coordinateFrame": "right-handed-y-up",
+  "placementCoordinateFrame": "model",
+  "units": "meters",
+  "createdAt": "2026-09-29T00:00:00.000Z",
+  "generatedAt": "2026-09-29T00:00:00.000Z",
+  "exportedAt": "2026-09-29T00:00:00.000Z",
+  "validatedAt": "2026-09-29T00:00:00.000Z",
+  "semanticNodes": [
+    {
+      "semanticId": "vessel.tri-deck-superyacht",
+      "semanticKind": "vessel",
+      "semanticRole": "tri-deck-superyacht",
+      "displayName": "Tri-Deck Superyacht",
+      "representation": {
+        "glbNodes": [
+          "SuperyachtHull",
+          "SuperyachtBow",
+          "SuperyachtSuperstructure"
+        ]
+      },
+      "interactionCapabilities": [
+        "selectable"
+      ]
+    },
+    {
+      "semanticId": "vessel.level.machinery",
+      "semanticKind": "level",
+      "semanticRole": "machinery",
+      "displayName": "Machinery",
+      "parentSemanticId": "vessel.tri-deck-superyacht",
+      "representation": {
+        "glbNodes": [
+          "SuperyachtMachineryLevel"
+        ]
+      },
+      "interactionCapabilities": [
+        "selectable",
+        "highlightable",
+        "isolatable"
+      ]
+    },
+    {
+      "semanticId": "vessel.level.lower-deck",
+      "semanticKind": "level",
+      "semanticRole": "lower-deck",
+      "displayName": "Lower Deck",
+      "parentSemanticId": "vessel.tri-deck-superyacht",
+      "representation": {
+        "glbNodes": [
+          "SuperyachtLowerDeck"
+        ]
+      },
+      "interactionCapabilities": [
+        "selectable",
+        "highlightable",
+        "isolatable"
+      ]
+    },
+    {
+      "semanticId": "vessel.level.main-deck",
+      "semanticKind": "level",
+      "semanticRole": "main-deck",
+      "displayName": "Main Deck",
+      "parentSemanticId": "vessel.tri-deck-superyacht",
+      "representation": {
+        "glbNodes": [
+          "SuperyachtMainDeck"
+        ]
+      },
+      "interactionCapabilities": [
+        "selectable",
+        "highlightable",
+        "isolatable"
+      ]
+    },
+    {
+      "semanticId": "vessel.level.upper-deck",
+      "semanticKind": "level",
+      "semanticRole": "upper-deck",
+      "displayName": "Upper Deck",
+      "parentSemanticId": "vessel.tri-deck-superyacht",
+      "representation": {
+        "glbNodes": [
+          "SuperyachtUpperDeck"
+        ]
+      },
+      "interactionCapabilities": [
+        "selectable",
+        "highlightable",
+        "isolatable"
+      ]
+    },
+    {
+      "semanticId": "vessel.level.bridge-deck",
+      "semanticKind": "level",
+      "semanticRole": "bridge-deck",
+      "displayName": "Bridge Deck",
+      "parentSemanticId": "vessel.tri-deck-superyacht",
+      "representation": {
+        "glbNodes": [
+          "SuperyachtBridgeDeck"
+        ]
+      },
+      "interactionCapabilities": [
+        "selectable",
+        "highlightable",
+        "isolatable"
+      ]
+    },
+    {
+      "semanticId": "vessel.level.sun-deck",
+      "semanticKind": "level",
+      "semanticRole": "sun-deck",
+      "displayName": "Sun Deck",
+      "parentSemanticId": "vessel.tri-deck-superyacht",
+      "representation": {
+        "glbNodes": [
+          "SuperyachtSunDeckLevel"
+        ]
+      },
+      "interactionCapabilities": [
+        "selectable",
+        "highlightable",
+        "isolatable"
+      ]
+    },
+    {
+      "semanticId": "vessel.area.engine-room",
+      "semanticKind": "area",
+      "semanticRole": "vessel-area",
+      "displayName": "Engine Room",
+      "parentSemanticId": "vessel.level.machinery",
+      "representation": {
+        "glbNodes": [
+          "SuperyachtEngineRoom"
+        ]
+      },
+      "interactionCapabilities": [
+        "selectable",
+        "highlightable"
+      ],
+      "spatial": {
+        "placementRegions": [
+          {
+            "regionId": "machinery",
+            "displayName": "Engine Room machinery",
+            "regionKind": "placement-volume",
+            "transform": {
+              "position": [
+                0,
+                1.05,
+                -2.8
+              ]
+            },
+            "dimensions": [
+              4.6,
+              0.6,
+              2.2
+            ]
+          }
+        ],
+        "placementAnchors": [
+          {
+            "anchorId": "machinery-center",
+            "displayName": "Engine Room machinery-center",
+            "transform": {
+              "position": [
+                0,
+                1.05,
+                -2.8
+              ]
+            },
+            "placementRegionId": "machinery"
+          }
+        ]
+      }
+    },
+    {
+      "semanticId": "vessel.area.forward-guest-stateroom",
+      "semanticKind": "area",
+      "semanticRole": "vessel-area",
+      "displayName": "Forward Guest Stateroom",
+      "parentSemanticId": "vessel.level.lower-deck",
+      "representation": {
+        "glbNodes": [
+          "SuperyachtForwardGuest"
+        ]
+      },
+      "interactionCapabilities": [
+        "selectable",
+        "highlightable"
+      ],
+      "spatial": {
+        "placementRegions": [
+          {
+            "regionId": "interior",
+            "displayName": "Forward Guest Stateroom interior",
+            "regionKind": "placement-volume",
+            "transform": {
+              "position": [
+                0,
+                2.25,
+                5.1
+              ]
+            },
+            "dimensions": [
+              4.7,
+              0.4,
+              2.4
+            ]
+          }
+        ],
+        "placementAnchors": [
+          {
+            "anchorId": "default",
+            "displayName": "Forward Guest Stateroom default",
+            "transform": {
+              "position": [
+                0,
+                2.25,
+                5.1
+              ]
+            },
+            "placementRegionId": "interior"
+          }
+        ]
+      }
+    },
+    {
+      "semanticId": "vessel.area.port-guest-stateroom",
+      "semanticKind": "area",
+      "semanticRole": "vessel-area",
+      "displayName": "Port Guest Stateroom",
+      "parentSemanticId": "vessel.level.lower-deck",
+      "representation": {
+        "glbNodes": [
+          "SuperyachtPortGuest"
+        ]
+      },
+      "interactionCapabilities": [
+        "selectable",
+        "highlightable"
+      ],
+      "spatial": {
+        "placementRegions": [
+          {
+            "regionId": "interior",
+            "displayName": "Port Guest Stateroom interior",
+            "regionKind": "placement-volume",
+            "transform": {
+              "position": [
+                -3,
+                2.2,
+                1.5
+              ]
+            },
+            "dimensions": [
+              3.2,
+              0.4,
+              1.8
+            ]
+          }
+        ],
+        "placementAnchors": [
+          {
+            "anchorId": "default",
+            "displayName": "Port Guest Stateroom default",
+            "transform": {
+              "position": [
+                -3,
+                2.2,
+                1.5
+              ]
+            },
+            "placementRegionId": "interior"
+          }
+        ]
+      }
+    },
+    {
+      "semanticId": "vessel.area.starboard-guest-stateroom",
+      "semanticKind": "area",
+      "semanticRole": "vessel-area",
+      "displayName": "Starboard Guest Stateroom",
+      "parentSemanticId": "vessel.level.lower-deck",
+      "representation": {
+        "glbNodes": [
+          "SuperyachtStarboardGuest"
+        ]
+      },
+      "interactionCapabilities": [
+        "selectable",
+        "highlightable"
+      ],
+      "spatial": {
+        "placementRegions": [
+          {
+            "regionId": "interior",
+            "displayName": "Starboard Guest Stateroom interior",
+            "regionKind": "placement-volume",
+            "transform": {
+              "position": [
+                3,
+                2.2,
+                1.5
+              ]
+            },
+            "dimensions": [
+              3.2,
+              0.4,
+              1.8
+            ]
+          }
+        ],
+        "placementAnchors": [
+          {
+            "anchorId": "default",
+            "displayName": "Starboard Guest Stateroom default",
+            "transform": {
+              "position": [
+                3,
+                2.2,
+                1.5
+              ]
+            },
+            "placementRegionId": "interior"
+          }
+        ]
+      }
+    },
+    {
+      "semanticId": "vessel.area.master-stateroom",
+      "semanticKind": "area",
+      "semanticRole": "vessel-area",
+      "displayName": "Master Stateroom",
+      "parentSemanticId": "vessel.level.lower-deck",
+      "representation": {
+        "glbNodes": [
+          "SuperyachtMaster"
+        ]
+      },
+      "interactionCapabilities": [
+        "selectable",
+        "highlightable"
+      ],
+      "spatial": {
+        "placementRegions": [
+          {
+            "regionId": "interior",
+            "displayName": "Master Stateroom interior",
+            "regionKind": "placement-volume",
+            "transform": {
+              "position": [
+                0,
+                2.3,
+                -3.1
+              ]
+            },
+            "dimensions": [
+              6.2,
+              0.5,
+              2.7
+            ]
+          }
+        ],
+        "placementAnchors": [
+          {
+            "anchorId": "default",
+            "displayName": "Master Stateroom default",
+            "transform": {
+              "position": [
+                0,
+                2.3,
+                -3.1
+              ]
+            },
+            "placementRegionId": "interior"
+          }
+        ]
+      }
+    },
+    {
+      "semanticId": "vessel.area.bow-foredeck",
+      "semanticKind": "area",
+      "semanticRole": "vessel-area",
+      "displayName": "Bow / Foredeck",
+      "parentSemanticId": "vessel.level.main-deck",
+      "representation": {
+        "glbNodes": [
+          "SuperyachtForedeck"
+        ]
+      },
+      "interactionCapabilities": [
+        "selectable",
+        "highlightable"
+      ],
+      "spatial": {
+        "placementRegions": [
+          {
+            "regionId": "deck",
+            "displayName": "Bow / Foredeck deck",
+            "regionKind": "placement-volume",
+            "transform": {
+              "position": [
+                0,
+                4.72,
+                8.1
+              ]
+            },
+            "dimensions": [
+              6.6,
+              0.3,
+              3
+            ]
+          }
+        ],
+        "placementAnchors": [
+          {
+            "anchorId": "bow-center",
+            "displayName": "Bow / Foredeck bow-center",
+            "transform": {
+              "position": [
+                0,
+                4.72,
+                8.1
+              ]
+            },
+            "placementRegionId": "deck"
+          }
+        ]
+      }
+    },
+    {
+      "semanticId": "vessel.area.main-salon",
+      "semanticKind": "area",
+      "semanticRole": "vessel-area",
+      "displayName": "Main Salon",
+      "parentSemanticId": "vessel.level.main-deck",
+      "representation": {
+        "glbNodes": [
+          "SuperyachtMainSalon"
+        ]
+      },
+      "interactionCapabilities": [
+        "selectable",
+        "highlightable"
+      ],
+      "spatial": {
+        "placementRegions": [
+          {
+            "regionId": "interior",
+            "displayName": "Main Salon interior",
+            "regionKind": "placement-volume",
+            "transform": {
+              "position": [
+                0,
+                5.2,
+                -0.3
+              ]
+            },
+            "dimensions": [
+              7.2,
+              0.6,
+              2.7
+            ]
+          }
+        ],
+        "placementAnchors": [
+          {
+            "anchorId": "default",
+            "displayName": "Main Salon default",
+            "transform": {
+              "position": [
+                0,
+                5.2,
+                -0.3
+              ]
+            },
+            "placementRegionId": "interior"
+          }
+        ]
+      }
+    },
+    {
+      "semanticId": "vessel.area.aft-deck",
+      "semanticKind": "area",
+      "semanticRole": "vessel-area",
+      "displayName": "Aft Deck",
+      "parentSemanticId": "vessel.level.main-deck",
+      "representation": {
+        "glbNodes": [
+          "SuperyachtAftDeck"
+        ]
+      },
+      "interactionCapabilities": [
+        "selectable",
+        "highlightable"
+      ],
+      "spatial": {
+        "placementRegions": [
+          {
+            "regionId": "deck",
+            "displayName": "Aft Deck deck",
+            "regionKind": "placement-volume",
+            "transform": {
+              "position": [
+                0,
+                4.75,
+                -7.2
+              ]
+            },
+            "dimensions": [
+              6.6,
+              0.3,
+              3
+            ]
+          }
+        ],
+        "placementAnchors": [
+          {
+            "anchorId": "aft-deck-center",
+            "displayName": "Aft Deck aft-deck-center",
+            "transform": {
+              "position": [
+                0,
+                4.75,
+                -7.2
+              ]
+            },
+            "placementRegionId": "deck"
+          }
+        ]
+      }
+    },
+    {
+      "semanticId": "vessel.area.sky-lounge",
+      "semanticKind": "area",
+      "semanticRole": "vessel-area",
+      "displayName": "Sky Lounge",
+      "parentSemanticId": "vessel.level.upper-deck",
+      "representation": {
+        "glbNodes": [
+          "SuperyachtSkyLounge"
+        ]
+      },
+      "interactionCapabilities": [
+        "selectable",
+        "highlightable"
+      ],
+      "spatial": {
+        "placementRegions": [
+          {
+            "regionId": "interior",
+            "displayName": "Sky Lounge interior",
+            "regionKind": "placement-volume",
+            "transform": {
+              "position": [
+                0,
+                7.5,
+                0.2
+              ]
+            },
+            "dimensions": [
+              6.4,
+              0.6,
+              2.5
+            ]
+          }
+        ],
+        "placementAnchors": [
+          {
+            "anchorId": "default",
+            "displayName": "Sky Lounge default",
+            "transform": {
+              "position": [
+                0,
+                7.5,
+                0.2
+              ]
+            },
+            "placementRegionId": "interior"
+          }
+        ]
+      }
+    },
+    {
+      "semanticId": "vessel.area.upper-aft-deck",
+      "semanticKind": "area",
+      "semanticRole": "vessel-area",
+      "displayName": "Upper Aft Deck",
+      "parentSemanticId": "vessel.level.upper-deck",
+      "representation": {
+        "glbNodes": [
+          "SuperyachtUpperAft"
+        ]
+      },
+      "interactionCapabilities": [
+        "selectable",
+        "highlightable"
+      ],
+      "spatial": {
+        "placementRegions": [
+          {
+            "regionId": "deck",
+            "displayName": "Upper Aft Deck deck",
+            "regionKind": "placement-volume",
+            "transform": {
+              "position": [
+                0,
+                7.22,
+                -5.2
+              ]
+            },
+            "dimensions": [
+              5.8,
+              0.3,
+              2.5
+            ]
+          }
+        ],
+        "placementAnchors": [
+          {
+            "anchorId": "upper-aft-center",
+            "displayName": "Upper Aft Deck upper-aft-center",
+            "transform": {
+              "position": [
+                0,
+                7.22,
+                -5.2
+              ]
+            },
+            "placementRegionId": "deck"
+          }
+        ]
+      }
+    },
+    {
+      "semanticId": "vessel.area.pilothouse",
+      "semanticKind": "area",
+      "semanticRole": "vessel-area",
+      "displayName": "Pilothouse",
+      "parentSemanticId": "vessel.level.bridge-deck",
+      "representation": {
+        "glbNodes": [
+          "SuperyachtPilothouse"
+        ]
+      },
+      "interactionCapabilities": [
+        "selectable",
+        "highlightable"
+      ],
+      "spatial": {
+        "placementRegions": [
+          {
+            "regionId": "helm",
+            "displayName": "Pilothouse helm",
+            "regionKind": "placement-volume",
+            "transform": {
+              "position": [
+                0,
+                9.45,
+                0.65
+              ]
+            },
+            "dimensions": [
+              4.5,
+              0.55,
+              2
+            ]
+          }
+        ],
+        "placementAnchors": [
+          {
+            "anchorId": "helm-center",
+            "displayName": "Pilothouse helm-center",
+            "transform": {
+              "position": [
+                0,
+                9.45,
+                0.65
+              ]
+            },
+            "placementRegionId": "helm"
+          }
+        ]
+      }
+    },
+    {
+      "semanticId": "vessel.area.sun-deck",
+      "semanticKind": "area",
+      "semanticRole": "vessel-area",
+      "displayName": "Sun Deck",
+      "parentSemanticId": "vessel.level.sun-deck",
+      "representation": {
+        "glbNodes": [
+          "SuperyachtSunDeck"
+        ]
+      },
+      "interactionCapabilities": [
+        "selectable",
+        "highlightable"
+      ],
+      "spatial": {
+        "placementRegions": [
+          {
+            "regionId": "deck",
+            "displayName": "Sun Deck deck",
+            "regionKind": "placement-volume",
+            "transform": {
+              "position": [
+                0,
+                11.2,
+                0.1
+              ]
+            },
+            "dimensions": [
+              5,
+              0.3,
+              2.1
+            ]
+          }
+        ],
+        "placementAnchors": [
+          {
+            "anchorId": "sun-deck-center",
+            "displayName": "Sun Deck sun-deck-center",
+            "transform": {
+              "position": [
+                0,
+                11.2,
+                0.1
+              ]
+            },
+            "placementRegionId": "deck"
+          }
+        ]
+      }
+    }
+  ],
+  "modelReferences": []
+}
