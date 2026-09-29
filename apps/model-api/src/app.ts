@@ -51,6 +51,16 @@ const fixtures = [
       "fixtures/spatial-models/convertible-sportfish.glb",
     ),
   },
+  {
+    manifestPath: resolve(
+      repositoryRoot,
+      "fixtures/spatial-models/tri-deck-superyacht.manifest.json",
+    ),
+    artifactPath: resolve(
+      repositoryRoot,
+      "fixtures/spatial-models/tri-deck-superyacht.glb",
+    ),
+  },
 ]
 
 type ValidatedModel = {

@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test"
 
-test("renders the Sportfish vessel and places cross-level capabilities", async ({
+test("renders the Superyacht vessel and places cross-level capabilities", async ({
   page,
 }) => {
   const consoleErrors: string[] = []
@@ -16,10 +16,10 @@ test("renders the Sportfish vessel and places cross-level capabilities", async (
   ).toBeVisible()
 
   await page.getByRole("combobox", { name: "Hull" }).selectOption({
-    label: "Convertible Sportfish",
+    label: "Tri-Deck Superyacht",
   })
   await expect(
-    page.getByRole("heading", { name: "Convertible Sportfish" }),
+    page.getByRole("heading", { name: "Tri-Deck Superyacht" }),
   ).toBeVisible()
 
   const canvas = page.locator("canvas")
@@ -56,25 +56,23 @@ test("renders the Sportfish vessel and places cross-level capabilities", async (
   await expect(
     page.getByRole("button", { name: "Level: Main Deck" }),
   ).toBeVisible()
-  await page.getByRole("button", { name: "Level: Main Deck" }).click()
+  await page.getByRole("button", { name: "Level: Upper Deck" }).click()
   await expect(page.getByText("LEVEL", { exact: true })).toBeVisible()
-  await page.getByRole("button", { name: "Area: Cockpit" }).click()
+  await page.getByRole("button", { name: "Area: Upper Aft Deck" }).click()
   await expect(page.getByText("AREA", { exact: true })).toBeVisible()
   await expect(
-    page.locator(".details").getByText("Main Deck", { exact: true }),
+    page.locator(".details").getByText("Upper Deck", { exact: true }),
   ).toBeVisible()
   await page.getByRole("button", { name: "Speaker" }).click()
   await page.getByRole("button", { name: "Add capability" }).click()
-  await expect(page.getByText("Speaker · Cockpit")).toBeVisible()
+  await expect(page.getByText("Speaker · Upper Aft Deck")).toBeVisible()
 
-  await page.getByRole("button", { name: "Level: Bridge" }).click()
+  await page.getByRole("button", { name: "Level: Sun Deck" }).click()
   await expect(page.getByText("LEVEL", { exact: true })).toBeVisible()
-  await page.getByRole("button", { name: "Area: Flybridge / Helm" }).click()
+  await page.getByRole("button", { name: "Area: Sun Deck" }).click()
   await page.getByRole("button", { name: "Thermal Camera" }).click()
   await page.getByRole("button", { name: "Add capability" }).click()
-  await expect(
-    page.getByText("Thermal Camera · Flybridge / Helm"),
-  ).toBeVisible()
+  await expect(page.getByText("Thermal Camera · Sun Deck")).toBeVisible()
 
   await page.getByRole("button", { name: "Area: Engine Room" }).click()
   await page.getByRole("button", { name: "Water Sensor" }).click()

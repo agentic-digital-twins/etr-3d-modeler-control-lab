@@ -18,8 +18,11 @@ describe("model API", () => {
     const sportfish = catalog.body.find(
       (model: { modelId: string }) => model.modelId === "convertible-sportfish",
     )
+    const superyacht = catalog.body.find(
+      (model: { modelId: string }) => model.modelId === "tri-deck-superyacht",
+    )
 
-    expect(catalog.body).toHaveLength(4)
+    expect(catalog.body).toHaveLength(5)
     expect(hatteras).toMatchObject({
       modelKind: "hatteras-63-motor-yacht",
       modelVersion: "0.1.0",
@@ -31,6 +34,11 @@ describe("model API", () => {
     })
     expect(sportfish).toMatchObject({
       displayName: "Convertible Sportfish",
+      modelKind: "vessel",
+      modelVersion: "0.1.0",
+    })
+    expect(superyacht).toMatchObject({
+      displayName: "Tri-Deck Superyacht",
       modelKind: "vessel",
       modelVersion: "0.1.0",
     })
@@ -51,6 +59,12 @@ describe("model API", () => {
       .expect(200)
     await request(app)
       .get("/api/models/convertible-sportfish/artifact")
+      .expect(200)
+    await request(app)
+      .get("/api/models/tri-deck-superyacht/manifest")
+      .expect(200)
+    await request(app)
+      .get("/api/models/tri-deck-superyacht/artifact")
       .expect(200)
     await request(app).get("/api/models/not-a-model").expect(404, {
       error: "model_not_found",
