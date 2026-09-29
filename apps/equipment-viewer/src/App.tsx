@@ -71,6 +71,7 @@ function Model({
   manifest,
   selectedSemanticId,
   activeAreaId,
+  activeLevelId,
   visibilityMode,
   onSelect,
   onReady,
@@ -78,6 +79,7 @@ function Model({
   manifest: SpatialModelManifest
   selectedSemanticId?: string
   activeAreaId?: string
+  activeLevelId?: string
   visibilityMode: VisibilityMode
   onSelect: (semanticId: string) => void
   onReady: () => void
@@ -102,23 +104,35 @@ function Model({
       const semanticNode = manifest.semanticNodes.find((candidate) =>
         candidate.representation.glbNodes.includes(node.name),
       )
-      node.visible =
-        visibilityMode === "all" ||
-        semanticNode?.semanticId === selectedSemanticId
+      const isSelectedLevel = semanticNode?.semanticId === activeLevelId
+      const isSelectedArea = semanticNode?.semanticId === activeAreaId
+      const isAreaInSelectedLevel =
+        semanticNode?.semanticKind === "area" &&
+        semanticNode.parentSemanticId === activeLevelId
+      const isInSelectionScope =
+        isSelectedLevel || isSelectedArea || isAreaInSelectedLevel
+      node.visible = visibilityMode === "all" || isInSelectionScope
       if (
         node instanceof Mesh &&
         node.material instanceof MeshStandardMaterial
       ) {
-        const isActiveArea = semanticNode?.semanticId === activeAreaId
-        node.material.color.set(isActiveArea ? "#f4b763" : "#418da2")
-        node.material.emissive.set(isActiveArea ? "#6f4219" : "#000000")
+        if (isSelectedArea) {
+          node.material.color.set("#f4b763")
+          node.material.emissive.set("#6f4219")
+        } else if (isSelectedLevel || isAreaInSelectedLevel) {
+          node.material.color.set("#58a6a2")
+          node.material.emissive.set("#164442")
+        } else {
+          node.material.color.set("#418da2")
+          node.material.emissive.set("#000000")
+        }
       }
     })
   }, [
     activeAreaId,
+    activeLevelId,
     manifest.semanticNodes,
     scene,
-    selectedSemanticId,
     visibilityMode,
   ])
 
@@ -146,6 +160,7 @@ export function App() {
   const [manifest, setManifest] = useState<SpatialModelManifest>()
   const [selectedSemanticId, setSelectedSemanticId] = useState<string>()
   const [activeAreaId, setActiveAreaId] = useState<string>()
+  const [activeLevelId, setActiveLevelId] = useState<string>()
   const [selectedCapability, setSelectedCapability] =
     useState<CapabilityKind>("camera.thermal")
   const [placements, setPlacements] = useState<CapabilityPlacement[]>([])
@@ -187,6 +202,9 @@ export function App() {
   const areas = manifest?.semanticNodes.filter(
     (semanticNode) => semanticNode.semanticKind === "area",
   )
+  const levels = manifest?.semanticNodes.filter(
+    (semanticNode) => semanticNode.semanticKind === "level",
+  )
   const activeArea = areas?.find(
     (semanticNode) => semanticNode.semanticId === activeAreaId,
   )
@@ -200,7 +218,7 @@ export function App() {
     )
   }
 
-  if (!manifest || !areas) {
+  if (!manifest || !areas || !levels) {
     return (
       <main className="state-panel">
         <h1>Spatial Model Explorer</h1>
@@ -217,6 +235,13 @@ export function App() {
     setVisibilityMode("all")
     if (semanticNode?.semanticKind === "area") {
       setActiveAreaId(semanticId)
+      setActiveLevelId(semanticNode.parentSemanticId)
+    } else if (semanticNode?.semanticKind === "level") {
+      setActiveAreaId(undefined)
+      setActiveLevelId(semanticId)
+    } else {
+      setActiveAreaId(undefined)
+      setActiveLevelId(undefined)
     }
   }
 
@@ -264,6 +289,7 @@ export function App() {
                 manifest={manifest}
                 selectedSemanticId={selectedSemanticId}
                 activeAreaId={activeAreaId}
+                activeLevelId={activeLevelId}
                 visibilityMode={visibilityMode}
                 onSelect={selectSemanticNode}
                 onReady={() => setIsArtifactReady(true)}
@@ -306,17 +332,40 @@ export function App() {
           </div>
         </section>
         <section>
-          <h2>Area</h2>
-          <div className="component-list">
-            {areas.map((area) => (
-              <button
-                className={area.semanticId === activeAreaId ? "selected" : ""}
-                key={area.semanticId}
-                onClick={() => selectSemanticNode(area.semanticId)}
-              >
-                {area.displayName}
-              </button>
-            ))}
+          <h2>Spatial Structure</h2>
+          <div className="spatial-structure">
+            {levels.map((level) => {
+              const levelAreas = areas.filter(
+                (area) => area.parentSemanticId === level.semanticId,
+              )
+              return (
+                <div className="level-entry" key={level.semanticId}>
+                  <button
+                    aria-label={`Level: ${level.displayName}`}
+                    className={
+                      level.semanticId === selectedSemanticId ? "selected" : ""
+                    }
+                    onClick={() => selectSemanticNode(level.semanticId)}
+                  >
+                    {level.displayName}
+                  </button>
+                  <div className="area-list">
+                    {levelAreas.map((area) => (
+                      <button
+                        aria-label={`Area: ${area.displayName}`}
+                        className={
+                          area.semanticId === activeAreaId ? "selected" : ""
+                        }
+                        key={area.semanticId}
+                        onClick={() => selectSemanticNode(area.semanticId)}
+                      >
+                        {area.displayName}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )
+            })}
           </div>
         </section>
         <section>
@@ -363,6 +412,7 @@ export function App() {
               onClick={() => {
                 setSelectedSemanticId(undefined)
                 setActiveAreaId(undefined)
+                setActiveLevelId(undefined)
                 setVisibilityMode("all")
               }}
             >
@@ -376,8 +426,22 @@ export function App() {
             <dl>
               <dt>Semantic node</dt>
               <dd>{selectedSemanticNode.semanticId}</dd>
+              <dt>Type</dt>
+              <dd>{selectedSemanticNode.semanticKind.toUpperCase()}</dd>
               <dt>Role</dt>
               <dd>{selectedSemanticNode.semanticRole}</dd>
+              {selectedSemanticNode.semanticKind === "area" ? (
+                <>
+                  <dt>Level</dt>
+                  <dd>
+                    {levels.find(
+                      (level) =>
+                        level.semanticId ===
+                        selectedSemanticNode.parentSemanticId,
+                    )?.displayName ?? "None"}
+                  </dd>
+                </>
+              ) : null}
               <dt>Anchor</dt>
               <dd>
                 {activeArea?.spatial?.placementAnchors[0]?.anchorId ?? "None"}

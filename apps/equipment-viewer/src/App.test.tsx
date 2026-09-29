@@ -47,10 +47,29 @@ const manifest = {
       interactionCapabilities: ["selectable"],
     },
     {
+      semanticId: "vessel.level.flybridge",
+      semanticKind: "level",
+      semanticRole: "flybridge",
+      displayName: "Flybridge",
+      parentSemanticId: "vessel.hatteras-63",
+      representation: { glbNodes: ["HatterasFlybridgeDeck"] },
+      interactionCapabilities: ["selectable", "highlightable", "isolatable"],
+    },
+    {
+      semanticId: "vessel.level.machinery",
+      semanticKind: "level",
+      semanticRole: "machinery",
+      displayName: "Machinery",
+      parentSemanticId: "vessel.hatteras-63",
+      representation: { glbNodes: ["HatterasMachineryDeck"] },
+      interactionCapabilities: ["selectable", "highlightable", "isolatable"],
+    },
+    {
       semanticId: "vessel.area.flybridge",
       semanticKind: "area",
       semanticRole: "vessel-area",
       displayName: "Flybridge",
+      parentSemanticId: "vessel.level.flybridge",
       representation: { glbNodes: ["HatterasFlybridge"] },
       interactionCapabilities: ["selectable", "highlightable"],
       spatial: {
@@ -78,6 +97,7 @@ const manifest = {
       semanticKind: "area",
       semanticRole: "vessel-area",
       displayName: "Engine Room",
+      parentSemanticId: "vessel.level.machinery",
       representation: { glbNodes: ["HatterasEngineRoom"] },
       interactionCapabilities: ["selectable", "highlightable"],
       spatial: {
@@ -111,16 +131,19 @@ describe("Spatial Model Explorer", () => {
     )
   })
 
-  it("places capability representations through vessel area anchors", async () => {
+  it("derives vessel structure and places capability representations", async () => {
     render(<App />)
 
     await screen.findByRole("heading", { name: "Hatteras 63 Motor Yacht" })
-    fireEvent.click(screen.getByRole("button", { name: "Flybridge" }))
+    fireEvent.click(screen.getByRole("button", { name: "Level: Flybridge" }))
+    expect(screen.getByText("LEVEL")).toBeTruthy()
+    fireEvent.click(screen.getByRole("button", { name: "Area: Flybridge" }))
+    expect(screen.getByText("AREA")).toBeTruthy()
     fireEvent.click(screen.getByRole("button", { name: "Add capability" }))
     expect(screen.getByText("Thermal Camera · Flybridge")).toBeTruthy()
 
     fireEvent.click(screen.getByRole("button", { name: "Water Sensor" }))
-    fireEvent.click(screen.getByRole("button", { name: "Engine Room" }))
+    fireEvent.click(screen.getByRole("button", { name: "Area: Engine Room" }))
     fireEvent.click(screen.getByRole("button", { name: "Add capability" }))
     expect(screen.getByText("Water Sensor · Engine Room")).toBeTruthy()
   })

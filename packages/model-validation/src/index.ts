@@ -92,6 +92,54 @@ function validateContainment(
   }
 }
 
+function validateVesselProfile(
+  manifest: SpatialModelManifest,
+  errors: string[],
+): void {
+  if (manifest.modelProfile !== "vessel") {
+    return
+  }
+
+  const vessels = manifest.semanticNodes.filter(
+    (node) => node.semanticKind === "vessel",
+  )
+  if (vessels.length !== 1) {
+    errors.push("Vessel profile must contain exactly one vessel semantic node.")
+    return
+  }
+
+  const vessel = vessels[0]
+  if (vessel.parentSemanticId) {
+    errors.push(`Vessel semantic node must be root-level: ${vessel.semanticId}`)
+  }
+  const levelIds = new Set(
+    manifest.semanticNodes
+      .filter((node) => node.semanticKind === "level")
+      .map((node) => node.semanticId),
+  )
+  if (levelIds.size === 0) {
+    errors.push("Vessel profile must contain at least one level semantic node.")
+  }
+
+  for (const level of manifest.semanticNodes.filter(
+    (node) => node.semanticKind === "level",
+  )) {
+    if (level.parentSemanticId !== vessel.semanticId) {
+      errors.push(
+        `Vessel level must be parented by the vessel: ${level.semanticId}`,
+      )
+    }
+  }
+
+  for (const area of manifest.semanticNodes.filter(
+    (node) => node.semanticKind === "area",
+  )) {
+    if (!area.parentSemanticId || !levelIds.has(area.parentSemanticId)) {
+      errors.push(`Vessel area must be parented by a level: ${area.semanticId}`)
+    }
+  }
+}
+
 export async function validateModel(
   manifestPath: string,
   artifactPath: string,
@@ -179,6 +227,7 @@ export async function validateModel(
     }
   }
   validateContainment(manifest, errors)
+  validateVesselProfile(manifest, errors)
 
   const timestamps = [
     manifest.createdAt,

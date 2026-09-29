@@ -42,6 +42,27 @@ async function createFixture(): Promise<{
   return { manifestPath, artifactPath }
 }
 
+async function createHatterasFixture(): Promise<{
+  manifestPath: string
+  artifactPath: string
+}> {
+  const directory = await mkdtemp(join(tmpdir(), "etr-hatteras-validation-"))
+  temporaryDirectories.push(directory)
+  const manifestPath = join(directory, "hatteras-63-motor-yacht.manifest.json")
+  const artifactPath = join(directory, "hatteras-63-motor-yacht.glb")
+  await Promise.all([
+    cp(
+      join(hatterasFixtureDirectory, "hatteras-63-motor-yacht.manifest.json"),
+      manifestPath,
+    ),
+    cp(
+      join(hatterasFixtureDirectory, "hatteras-63-motor-yacht.glb"),
+      artifactPath,
+    ),
+  ])
+  return { manifestPath, artifactPath }
+}
+
 async function mutateManifest(
   manifestPath: string,
   mutate: (manifest: Record<string, any>) => void,
@@ -83,6 +104,59 @@ describe("validateModel", () => {
     expect(report).toMatchObject({ valid: true })
     if (report.valid) {
       expect(report.manifest.placementCoordinateFrame).toBe("model")
+      expect(
+        report.manifest.semanticNodes.filter(
+          (node) => node.semanticKind === "level",
+        ),
+      ).toHaveLength(4)
+    }
+  })
+
+  it("rejects vessel levels and areas with invalid hierarchy parents", async () => {
+    const { manifestPath, artifactPath } = await createHatterasFixture()
+    await mutateManifest(manifestPath, (manifest) => {
+      const mainDeck = manifest.semanticNodes.find(
+        (node: { semanticId: string }) =>
+          node.semanticId === "vessel.level.main-deck",
+      )
+      const salon = manifest.semanticNodes.find(
+        (node: { semanticId: string }) =>
+          node.semanticId === "vessel.area.salon",
+      )
+      mainDeck.parentSemanticId = "vessel.area.salon"
+      salon.parentSemanticId = "vessel.hatteras-63"
+    })
+
+    const report = await validateModel(manifestPath, artifactPath)
+
+    expect(report).toMatchObject({ valid: false })
+    if (!report.valid) {
+      expect(report.errors).toEqual(
+        expect.arrayContaining([
+          "Vessel level must be parented by the vessel: vessel.level.main-deck",
+          "Vessel area must be parented by a level: vessel.area.salon",
+        ]),
+      )
+    }
+  })
+
+  it("rejects a vessel semantic node that is not root-level", async () => {
+    const { manifestPath, artifactPath } = await createHatterasFixture()
+    await mutateManifest(manifestPath, (manifest) => {
+      const vessel = manifest.semanticNodes.find(
+        (node: { semanticId: string }) =>
+          node.semanticId === "vessel.hatteras-63",
+      )
+      vessel.parentSemanticId = "vessel.level.main-deck"
+    })
+
+    const report = await validateModel(manifestPath, artifactPath)
+
+    expect(report).toMatchObject({ valid: false })
+    if (!report.valid) {
+      expect(report.errors).toContain(
+        "Vessel semantic node must be root-level: vessel.hatteras-63",
+      )
     }
   })
 
