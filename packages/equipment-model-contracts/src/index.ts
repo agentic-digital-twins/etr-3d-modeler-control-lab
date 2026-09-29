@@ -103,6 +103,7 @@ export const SpatialModelManifestSchema = z.object({
   }),
   sourceReferences: z.array(SourceReferenceSchema).default([]),
   coordinateFrame: z.string().min(1),
+  placementCoordinateFrame: z.literal("model").default("model"),
   units: z.string().min(1),
   createdAt: z.string().datetime(),
   generatedAt: z.string().datetime(),

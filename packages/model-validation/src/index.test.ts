@@ -75,12 +75,29 @@ describe("validateModel", () => {
   })
 
   it("accepts the checked-in Hatteras vessel fixture", async () => {
-    await expect(
-      validateModel(
-        join(hatterasFixtureDirectory, "hatteras-63-motor-yacht.manifest.json"),
-        join(hatterasFixtureDirectory, "hatteras-63-motor-yacht.glb"),
-      ),
-    ).resolves.toMatchObject({ valid: true })
+    const report = await validateModel(
+      join(hatterasFixtureDirectory, "hatteras-63-motor-yacht.manifest.json"),
+      join(hatterasFixtureDirectory, "hatteras-63-motor-yacht.glb"),
+    )
+
+    expect(report).toMatchObject({ valid: true })
+    if (report.valid) {
+      expect(report.manifest.placementCoordinateFrame).toBe("model")
+    }
+  })
+
+  it("rejects an unsupported placement coordinate frame", async () => {
+    const { manifestPath, artifactPath } = await createFixture()
+    await mutateManifest(manifestPath, (manifest) => {
+      manifest.placementCoordinateFrame = "placement-region"
+    })
+
+    const report = await validateModel(manifestPath, artifactPath)
+
+    expect(report).toMatchObject({ valid: false })
+    if (!report.valid) {
+      expect(report.errors).toContain('Invalid literal value, expected "model"')
+    }
   })
 
   it("accepts multiple representation nodes, placement anchors, and model references", async () => {

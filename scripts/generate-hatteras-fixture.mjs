@@ -211,6 +211,7 @@ const manifest = {
   },
   sourceReferences: [],
   coordinateFrame: "right-handed-y-up",
+  placementCoordinateFrame: "model",
   units: "meters",
   createdAt: "2026-09-28T00:00:00.000Z",
   generatedAt: "2026-09-28T00:00:00.000Z",
