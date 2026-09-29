@@ -31,6 +31,16 @@ const fixtures = [
       "fixtures/spatial-models/hatteras-63-motor-yacht.glb",
     ),
   },
+  {
+    manifestPath: resolve(
+      repositoryRoot,
+      "fixtures/spatial-models/offshore-center-console.manifest.json",
+    ),
+    artifactPath: resolve(
+      repositoryRoot,
+      "fixtures/spatial-models/offshore-center-console.glb",
+    ),
+  },
 ]
 
 type ValidatedModel = {
@@ -62,6 +72,10 @@ export async function createApp(): Promise<Express> {
         modelId: manifest.modelId,
         modelKind: manifest.modelKind,
         modelVersion: manifest.modelVersion,
+        displayName:
+          manifest.semanticNodes.find(
+            (semanticNode) => semanticNode.semanticKind === "vessel",
+          )?.displayName ?? manifest.modelKind,
       })),
     )
   })

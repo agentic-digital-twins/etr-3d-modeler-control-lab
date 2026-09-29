@@ -11,10 +11,19 @@ describe("model API", () => {
       (model: { modelId: string }) =>
         model.modelId === "hatteras-63-motor-yacht-prototype",
     )
+    const centerConsole = catalog.body.find(
+      (model: { modelId: string }) =>
+        model.modelId === "offshore-center-console",
+    )
 
-    expect(catalog.body).toHaveLength(2)
+    expect(catalog.body).toHaveLength(3)
     expect(hatteras).toMatchObject({
       modelKind: "hatteras-63-motor-yacht",
+      modelVersion: "0.1.0",
+    })
+    expect(centerConsole).toMatchObject({
+      displayName: "Offshore Center Console",
+      modelKind: "vessel",
       modelVersion: "0.1.0",
     })
     await request(app)
@@ -22,6 +31,12 @@ describe("model API", () => {
       .expect(200)
     await request(app)
       .get("/api/models/hatteras-63-motor-yacht-prototype/artifact")
+      .expect(200)
+    await request(app)
+      .get("/api/models/offshore-center-console/manifest")
+      .expect(200)
+    await request(app)
+      .get("/api/models/offshore-center-console/artifact")
       .expect(200)
     await request(app).get("/api/models/not-a-model").expect(404, {
       error: "model_not_found",

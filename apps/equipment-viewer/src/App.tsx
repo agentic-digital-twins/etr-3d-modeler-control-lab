@@ -9,7 +9,9 @@ import {
 } from "@etr/equipment-model-contracts"
 
 const apiBaseUrl = import.meta.env.VITE_MODEL_API_BASE_URL ?? ""
-const defaultModelId = "hatteras-63-motor-yacht-prototype"
+const defaultModelId =
+  new URLSearchParams(window.location.search).get("model") ??
+  "hatteras-63-motor-yacht-prototype"
 
 type VisibilityMode = "all" | "isolated"
 type CapabilityKind = "camera.thermal" | "audio.speaker" | "sensor.water"
@@ -17,6 +19,10 @@ type CapabilityPlacement = {
   capability: CapabilityKind
   areaId: string
   anchorId: string
+}
+type CatalogModel = {
+  modelId: string
+  displayName: string
 }
 
 const capabilityDefinitions: Array<{
@@ -157,6 +163,8 @@ function Model({
 }
 
 export function App() {
+  const [modelId, setModelId] = useState(defaultModelId)
+  const [catalog, setCatalog] = useState<CatalogModel[]>([])
   const [manifest, setManifest] = useState<SpatialModelManifest>()
   const [selectedSemanticId, setSelectedSemanticId] = useState<string>()
   const [activeAreaId, setActiveAreaId] = useState<string>()
@@ -171,10 +179,37 @@ export function App() {
   useEffect(() => {
     const controller = new AbortController()
 
+    async function loadCatalog() {
+      try {
+        const response = await fetch(`${apiBaseUrl}/api/models`, {
+          signal: controller.signal,
+        })
+        if (!response.ok) {
+          throw new Error(`Model API returned ${response.status}`)
+        }
+        setCatalog((await response.json()) as CatalogModel[])
+      } catch (loadError) {
+        if (!controller.signal.aborted) {
+          setError(
+            loadError instanceof Error
+              ? loadError.message
+              : "Unable to load model catalog",
+          )
+        }
+      }
+    }
+
+    void loadCatalog()
+    return () => controller.abort()
+  }, [])
+
+  useEffect(() => {
+    const controller = new AbortController()
+
     async function loadManifest() {
       try {
         const response = await fetch(
-          `${apiBaseUrl}/api/models/${defaultModelId}/manifest`,
+          `${apiBaseUrl}/api/models/${modelId}/manifest`,
           { signal: controller.signal },
         )
         if (!response.ok) {
@@ -194,7 +229,7 @@ export function App() {
 
     void loadManifest()
     return () => controller.abort()
-  }, [])
+  }, [modelId])
 
   const selectedSemanticNode = manifest?.semanticNodes.find(
     (semanticNode) => semanticNode.semanticId === selectedSemanticId,
@@ -245,6 +280,21 @@ export function App() {
     }
   }
 
+  function selectModel(nextModelId: string) {
+    const url = new URL(window.location.href)
+    url.searchParams.set("model", nextModelId)
+    window.history.replaceState({}, "", url)
+    setModelId(nextModelId)
+    setManifest(undefined)
+    setError(undefined)
+    setSelectedSemanticId(undefined)
+    setActiveAreaId(undefined)
+    setActiveLevelId(undefined)
+    setPlacements([])
+    setVisibilityMode("all")
+    setIsArtifactReady(false)
+  }
+
   function addCapability() {
     const anchor = activeArea?.spatial?.placementAnchors[0]
     if (!activeArea || !anchor) {
@@ -269,10 +319,26 @@ export function App() {
             {manifest.semanticNodes[0]?.displayName ?? manifest.modelKind}
           </h1>
         </div>
-        <p className="artifact">
-          {manifest.modelProfile} · {manifest.artifact.artifactVersion} ·
-          validated fixture
-        </p>
+        <div className="header-controls">
+          <label className="model-selector">
+            Hull
+            <select
+              aria-label="Hull"
+              onChange={(event) => selectModel(event.target.value)}
+              value={modelId}
+            >
+              {catalog.map((model) => (
+                <option key={model.modelId} value={model.modelId}>
+                  {model.displayName}
+                </option>
+              ))}
+            </select>
+          </label>
+          <p className="artifact">
+            {manifest.modelProfile} · {manifest.artifact.artifactVersion} ·
+            validated fixture
+          </p>
+        </div>
       </header>
       <section
         className="canvas-shell"
@@ -283,7 +349,7 @@ export function App() {
           <color attach="background" args={["#dfe7e5"]} />
           <ambientLight intensity={1.5} />
           <directionalLight position={[2, 3, 4]} intensity={2} />
-          <Bounds fit clip observe margin={1.5}>
+          <Bounds fit clip margin={1.5}>
             <Suspense fallback={null}>
               <Model
                 manifest={manifest}
