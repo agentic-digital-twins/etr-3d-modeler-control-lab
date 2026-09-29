@@ -1,26 +1,28 @@
 repositoryId: etr-3d-modeler-control-lab
 repositoryKind: control-lab
 purpose:
-  capability: semantic-equipment-model-generation
-  statement: Generate and validate semantically structured, web-ready equipment models.
+  capability: semantic-spatial-model-generation
+  statement: Generate and validate semantically structured, web-ready spatial models.
 architecture:
-  realm: equipment-modeling
-  faculty: spatial-modeling
+  realm: spatial-modeling
+  faculty: spatial-representation
   maturity: experimental
 boundaries:
   owns:
-    - equipment-model-generation
-    - equipment-model-semantic-contracts
-    - equipment-model-validation
-    - equipment-model-inspection
+    - spatial-model-generation
+    - spatial-model-semantic-contracts
+    - spatial-model-validation
+    - spatial-model-inspection
+    - spatial-representation-binding
   doesNotOwn:
-    - operational-equipment-state
+    - physical-operational-state
     - telemetry-truth
+    - installed-capability-truth
     - alert-lifecycle
     - maintenance-truth
     - chief-decision-authority
 subjects:
-  - subjectKind: equipment-model
+  - subjectKind: spatial-model
 firstCustomer: Detroit Diesel 8V92TA Equipment Explorer
 integrations:
   current: []

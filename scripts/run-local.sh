@@ -17,6 +17,15 @@ if [[ ! -d "$ROOT/node_modules" ]]; then
   exit 1
 fi
 validate_modeler_configuration
+echo "[modeler-local] Local development only: reclaiming configured ports stops any listener on them; do not use this behavior for production startup."
+reclaim_modeler_ports
+
+for _ in {1..30}; do
+  if ensure_modeler_ports_available >/dev/null 2>&1; then
+    break
+  fi
+  sleep 1
+done
 ensure_modeler_ports_available
 
 cleanup() {
@@ -27,6 +36,7 @@ trap cleanup EXIT INT TERM
 
 echo "[modeler-local] API: http://${MODEL_API_HOST}:${MODEL_API_PORT}"
 echo "[modeler-local] Viewer: http://localhost:${MODEL_VIEWER_PORT}"
+echo "[modeler-local] Launch URL: http://localhost:${MODEL_VIEWER_PORT}"
 echo "[modeler-local] API upstream: ${MODEL_API_UPSTREAM}"
 
 pnpm --filter @etr/model-api dev &
@@ -37,7 +47,7 @@ viewer_pid=$!
 for _ in {1..30}; do
   if curl -fsS "http://${MODEL_API_HOST}:${MODEL_API_PORT}/health" >/dev/null && curl -fsS "http://127.0.0.1:${MODEL_VIEWER_PORT}" >/dev/null; then
     echo "[modeler-local] Ready"
-    echo "[modeler-local] Open: http://localhost:${MODEL_VIEWER_PORT}"
+    echo "[modeler-local] Launch URL: http://localhost:${MODEL_VIEWER_PORT}"
     print_modeler_lan_urls
     echo "[modeler-local] Health: http://${MODEL_API_HOST}:${MODEL_API_PORT}/health"
     wait -n "$api_pid" "$viewer_pid"

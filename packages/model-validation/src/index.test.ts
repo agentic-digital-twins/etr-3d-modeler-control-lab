@@ -16,6 +16,10 @@ const fixtureManifest = join(
   "dd-8v92ta-cylinder.manifest.json",
 )
 const fixtureArtifact = join(fixtureDirectory, "dd-8v92ta-cylinder.glb")
+const hatterasFixtureDirectory = join(
+  import.meta.dirname,
+  "../../../fixtures/spatial-models",
+)
 const temporaryDirectories: string[] = []
 
 async function createFixture(): Promise<{
@@ -68,6 +72,105 @@ describe("validateModel", () => {
     await expect(
       validateModel(manifestPath, artifactPath),
     ).resolves.toMatchObject({ valid: true })
+  })
+
+  it("accepts the checked-in Hatteras vessel fixture", async () => {
+    const report = await validateModel(
+      join(hatterasFixtureDirectory, "hatteras-63-motor-yacht.manifest.json"),
+      join(hatterasFixtureDirectory, "hatteras-63-motor-yacht.glb"),
+    )
+
+    expect(report).toMatchObject({ valid: true })
+    if (report.valid) {
+      expect(report.manifest.placementCoordinateFrame).toBe("model")
+    }
+  })
+
+  it("rejects an unsupported placement coordinate frame", async () => {
+    const { manifestPath, artifactPath } = await createFixture()
+    await mutateManifest(manifestPath, (manifest) => {
+      manifest.placementCoordinateFrame = "placement-region"
+    })
+
+    const report = await validateModel(manifestPath, artifactPath)
+
+    expect(report).toMatchObject({ valid: false })
+    if (!report.valid) {
+      expect(report.errors).toContain('Invalid literal value, expected "model"')
+    }
+  })
+
+  it("accepts multiple representation nodes, placement anchors, and model references", async () => {
+    const { manifestPath, artifactPath } = await createFixture()
+    await mutateManifest(manifestPath, (manifest) => {
+      manifest.semanticNodes = [
+        {
+          ...manifest.semanticNodes[0],
+          representation: { glbNodes: ["Cylinder_L1", "Piston_L1"] },
+          spatial: {
+            placementRegions: [
+              {
+                regionId: "service-surface",
+                displayName: "Service surface",
+                regionKind: "surface",
+                transform: { position: [0, 0, 0] },
+                dimensions: [1, 1, 1],
+              },
+            ],
+            placementAnchors: [
+              {
+                anchorId: "service-center",
+                displayName: "Service center",
+                placementRegionId: "service-surface",
+                transform: { position: [0, 0, 0] },
+              },
+            ],
+          },
+        },
+      ]
+      manifest.modelReferences = [
+        {
+          modelId: "sensor-model",
+          instanceId: "sensor.service",
+          parentSemanticId: "cylinder.l1",
+          transform: { position: [0, 0, 0] },
+        },
+      ]
+    })
+
+    await expect(
+      validateModel(manifestPath, artifactPath),
+    ).resolves.toMatchObject({ valid: true })
+  })
+
+  it("rejects duplicate placement anchors within a semantic node", async () => {
+    const { manifestPath, artifactPath } = await createFixture()
+    await mutateManifest(manifestPath, (manifest) => {
+      manifest.semanticNodes[0].spatial = {
+        placementRegions: [],
+        placementAnchors: [
+          {
+            anchorId: "overhead-center",
+            displayName: "Overhead center",
+            transform: { position: [0, 0, 0] },
+          },
+          {
+            anchorId: "overhead-center",
+            displayName: "Overhead center duplicate",
+            transform: { position: [0, 1, 0] },
+          },
+        ],
+      }
+    })
+
+    const report = await validateModel(manifestPath, artifactPath)
+
+    expect(report).toMatchObject({ valid: false })
+    if (!report.valid) {
+      expect(report.errors).toContain(
+        "Duplicate placement anchor: cylinder.l1 -> overhead-center",
+      )
+    }
   })
 
   it("rejects an artifact whose file name differs from the manifest", async () => {
@@ -128,11 +231,11 @@ describe("validateModel", () => {
     const { manifestPath, artifactPath } = await createFixture()
     await mutateManifest(manifestPath, (manifest) => {
       manifest.artifact.contentFingerprint = "sha256:" + "0".repeat(64)
-      manifest.components.push({
-        ...manifest.components[0],
-        componentId: "piston.l2",
+      manifest.semanticNodes.push({
+        ...manifest.semanticNodes[0],
+        semanticId: "piston.l2",
       })
-      manifest.components[1].glbNodeName = "Absent_Node"
+      manifest.semanticNodes[1].representation.glbNodes = ["Absent_Node"]
     })
     const report = await validateModel(manifestPath, artifactPath)
     expect(report).toMatchObject({ valid: false })
@@ -140,7 +243,7 @@ describe("validateModel", () => {
       expect(report.errors).toEqual(
         expect.arrayContaining([
           expect.stringContaining("fingerprint"),
-          expect.stringContaining("Duplicate glbNodeName"),
+          expect.stringContaining("Duplicate GLB node binding"),
           expect.stringContaining("GLB node not found"),
         ]),
       )
@@ -150,8 +253,8 @@ describe("validateModel", () => {
   it("rejects invalid containment and lifecycle ordering", async () => {
     const { manifestPath, artifactPath } = await createFixture()
     await mutateManifest(manifestPath, (manifest) => {
-      manifest.components[0].parentComponentId = "missing.component"
-      manifest.components[1].parentComponentId = "piston.l1"
+      manifest.semanticNodes[0].parentSemanticId = "missing.semantic-node"
+      manifest.semanticNodes[1].parentSemanticId = "piston.l1"
       manifest.generatedAt = "2026-09-20T00:00:00.000Z"
     })
     const report = await validateModel(manifestPath, artifactPath)
@@ -159,8 +262,8 @@ describe("validateModel", () => {
     if (!report.valid) {
       expect(report.errors).toEqual(
         expect.arrayContaining([
-          expect.stringContaining("Parent component not found"),
-          expect.stringContaining("Component cannot parent itself"),
+          expect.stringContaining("Parent semantic node not found"),
+          expect.stringContaining("Semantic node cannot parent itself"),
           expect.stringContaining("Lifecycle timestamps"),
         ]),
       )
@@ -170,7 +273,7 @@ describe("validateModel", () => {
   it("rejects containment cycles and malformed GLB artifacts", async () => {
     const { manifestPath, artifactPath } = await createFixture()
     await mutateManifest(manifestPath, (manifest) => {
-      manifest.components[0].parentComponentId = "piston.l1"
+      manifest.semanticNodes[0].parentSemanticId = "piston.l1"
     })
     await writeFile(artifactPath, Buffer.from("not-a-glb"))
     const report = await validateModel(manifestPath, artifactPath)

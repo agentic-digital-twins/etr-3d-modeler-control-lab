@@ -111,7 +111,7 @@ import net from "node:net"
 
 const listeners = [
   [process.env.MODEL_API_HOST, Number(process.env.MODEL_API_PORT), "Model API"],
-  [process.env.MODEL_VIEWER_HOST, Number(process.env.MODEL_VIEWER_PORT), "Equipment Explorer"],
+  [process.env.MODEL_VIEWER_HOST, Number(process.env.MODEL_VIEWER_PORT), "Spatial Model Explorer"],
 ]
 
 await Promise.all(listeners.map(([host, port, label]) => new Promise((resolve, reject) => {
@@ -119,6 +119,109 @@ await Promise.all(listeners.map(([host, port, label]) => new Promise((resolve, r
   server.once("error", (error) => reject(new Error(`${label} port ${port} on ${host} is unavailable: ${error.message}`)))
   server.listen({ host, port }, () => server.close(resolve))
 })))
+NODE
+}
+
+reclaim_modeler_ports() {
+  MODEL_API_PORT="$MODEL_API_PORT" \
+  MODEL_VIEWER_PORT="$MODEL_VIEWER_PORT" \
+  node --input-type=module <<'NODE'
+import { execFileSync } from "node:child_process"
+
+const listeners = [
+  [Number(process.env.MODEL_API_PORT), "Model API"],
+  [Number(process.env.MODEL_VIEWER_PORT), "Spatial Model Explorer"],
+]
+
+function listenerPids(port) {
+  if (process.platform === "win32") {
+    const output = execFileSync("netstat", ["-ano", "-p", "tcp"], {
+      encoding: "utf8",
+    })
+    return [...new Set(
+      output
+        .split(/\r?\n/)
+        .flatMap((line) => {
+          const match = line.match(
+            /^\s*TCP\s+\S+:(\d+)\s+\S+\s+LISTENING\s+(\d+)\s*$/i,
+          )
+          return match?.[1] === String(port) ? [match[2]] : []
+        }),
+    )]
+  }
+
+  try {
+    return execFileSync("lsof", ["-tiTCP:" + port, "-sTCP:LISTEN"], {
+      encoding: "utf8",
+    })
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean)
+  } catch (error) {
+    if (error.status === 1) {
+      return []
+    }
+    throw error
+  }
+}
+
+function processDescription(pid) {
+  if (process.platform === "win32") {
+    try {
+      const commandLine = execFileSync(
+        "powershell.exe",
+        [
+          "-NoProfile",
+          "-Command",
+          `$process = Get-CimInstance Win32_Process -Filter 'ProcessId = ${pid}'; if ($null -ne $process) { \"$($process.Name) $($process.CommandLine)\" }`,
+        ],
+        { encoding: "utf8" },
+      )
+        .replace(/\s+/g, " ")
+        .trim()
+      if (commandLine) {
+        return commandLine
+      }
+    } catch {
+    }
+
+    try {
+      return execFileSync("tasklist", ["/FI", `PID eq ${pid}`, "/FO", "CSV", "/NH"], {
+        encoding: "utf8",
+      })
+        .trim()
+        .replace(/^"([^"]+)".*$/, "$1")
+    } catch {
+      return "unknown process"
+    }
+  }
+
+  try {
+    return execFileSync("ps", ["-p", pid, "-o", "command="], {
+      encoding: "utf8",
+    })
+      .replace(/\s+/g, " ")
+      .trim()
+  } catch {
+    return "unknown process"
+  }
+}
+
+for (const [port, label] of listeners) {
+  for (const pid of listenerPids(port)) {
+    const owner = processDescription(pid)
+    if (process.platform === "win32") {
+      execFileSync("taskkill", ["/PID", pid, "/T", "/F"], {
+        stdio: "ignore",
+      })
+    } else {
+      process.kill(Number(pid), "SIGTERM")
+    }
+    console.log(
+      `[modeler-local] Reclaimed ${label} port ${port} by stopping PID ${pid}: ${owner}`,
+    )
+  }
+}
 NODE
 }
 

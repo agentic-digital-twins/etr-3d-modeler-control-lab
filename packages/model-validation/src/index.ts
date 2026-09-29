@@ -3,12 +3,12 @@ import { readFile } from "node:fs/promises"
 import { basename } from "node:path"
 
 import {
-  EquipmentModelManifestSchema,
-  type EquipmentModelManifest,
+  SpatialModelManifestSchema,
+  type SpatialModelManifest,
 } from "@etr/equipment-model-contracts"
 
 export type ValidationReport =
-  | { valid: true; manifest: EquipmentModelManifest }
+  | { valid: true; manifest: SpatialModelManifest }
   | { valid: false; errors: string[] }
 
 function readGlbNodeNames(contents: Buffer): Set<string> {
@@ -42,44 +42,52 @@ function readGlbNodeNames(contents: Buffer): Set<string> {
 }
 
 function validateContainment(
-  manifest: EquipmentModelManifest,
+  manifest: SpatialModelManifest,
   errors: string[],
 ): void {
-  const components = new Map(
-    manifest.components.map((component) => [component.componentId, component]),
+  const semanticNodes = new Map(
+    manifest.semanticNodes.map((node) => [node.semanticId, node]),
   )
 
-  for (const component of manifest.components) {
-    if (!component.parentComponentId) {
+  for (const node of manifest.semanticNodes) {
+    if (!node.parentSemanticId) {
       continue
     }
-    if (component.parentComponentId === component.componentId) {
-      errors.push(`Component cannot parent itself: ${component.componentId}`)
+    if (node.parentSemanticId === node.semanticId) {
+      errors.push(`Semantic node cannot parent itself: ${node.semanticId}`)
       continue
     }
-    if (!components.has(component.parentComponentId)) {
+    if (!semanticNodes.has(node.parentSemanticId)) {
       errors.push(
-        `Parent component not found: ${component.componentId} -> ${component.parentComponentId}`,
+        `Parent semantic node not found: ${node.semanticId} -> ${node.parentSemanticId}`,
       )
     }
   }
 
-  for (const component of manifest.components) {
+  for (const node of manifest.semanticNodes) {
     const visited = new Set<string>()
-    let current = component
-    while (current.parentComponentId) {
-      if (visited.has(current.componentId)) {
+    let current = node
+    while (current.parentSemanticId) {
+      if (visited.has(current.semanticId)) {
         errors.push(
-          `Containment cycle detected at component: ${component.componentId}`,
+          `Containment cycle detected at semantic node: ${node.semanticId}`,
         )
         break
       }
-      visited.add(current.componentId)
-      const parent = components.get(current.parentComponentId)
+      visited.add(current.semanticId)
+      const parent = semanticNodes.get(current.parentSemanticId)
       if (!parent) {
         break
       }
       current = parent
+    }
+  }
+
+  for (const reference of manifest.modelReferences) {
+    if (!semanticNodes.has(reference.parentSemanticId)) {
+      errors.push(
+        `Model reference parent not found: ${reference.instanceId} -> ${reference.parentSemanticId}`,
+      )
     }
   }
 }
@@ -93,7 +101,7 @@ export async function validateModel(
     readFile(manifestPath, "utf8"),
     readFile(artifactPath),
   ])
-  const parsed = EquipmentModelManifestSchema.safeParse(
+  const parsed = SpatialModelManifestSchema.safeParse(
     JSON.parse(manifestContents),
   )
 
@@ -116,7 +124,7 @@ export async function validateModel(
     errors.push("Artifact file name does not match the supplied artifact path.")
   }
 
-  const componentIds = new Set<string>()
+  const semanticIds = new Set<string>()
   const nodeNames = new Set<string>()
   let artifactNodeNames = new Set<string>()
   try {
@@ -126,18 +134,49 @@ export async function validateModel(
       error instanceof Error ? error.message : "Unable to inspect GLB nodes.",
     )
   }
-  for (const component of manifest.components) {
-    if (componentIds.has(component.componentId)) {
-      errors.push(`Duplicate componentId: ${component.componentId}`)
+  for (const semanticNode of manifest.semanticNodes) {
+    if (semanticIds.has(semanticNode.semanticId)) {
+      errors.push(`Duplicate semanticId: ${semanticNode.semanticId}`)
     }
-    if (nodeNames.has(component.glbNodeName)) {
-      errors.push(`Duplicate glbNodeName: ${component.glbNodeName}`)
+    for (const glbNodeName of semanticNode.representation.glbNodes) {
+      if (nodeNames.has(glbNodeName)) {
+        errors.push(`Duplicate GLB node binding: ${glbNodeName}`)
+      }
+      if (!artifactNodeNames.has(glbNodeName)) {
+        errors.push(`GLB node not found: ${glbNodeName}`)
+      }
+      nodeNames.add(glbNodeName)
     }
-    if (!artifactNodeNames.has(component.glbNodeName)) {
-      errors.push(`GLB node not found: ${component.glbNodeName}`)
+    semanticIds.add(semanticNode.semanticId)
+
+    const placementRegionIds = new Set<string>()
+    for (const placementRegion of semanticNode.spatial?.placementRegions ??
+      []) {
+      if (placementRegionIds.has(placementRegion.regionId)) {
+        errors.push(
+          `Duplicate placement region: ${semanticNode.semanticId} -> ${placementRegion.regionId}`,
+        )
+      }
+      placementRegionIds.add(placementRegion.regionId)
     }
-    componentIds.add(component.componentId)
-    nodeNames.add(component.glbNodeName)
+    const placementAnchorIds = new Set<string>()
+    for (const placementAnchor of semanticNode.spatial?.placementAnchors ??
+      []) {
+      if (placementAnchorIds.has(placementAnchor.anchorId)) {
+        errors.push(
+          `Duplicate placement anchor: ${semanticNode.semanticId} -> ${placementAnchor.anchorId}`,
+        )
+      }
+      if (
+        placementAnchor.placementRegionId &&
+        !placementRegionIds.has(placementAnchor.placementRegionId)
+      ) {
+        errors.push(
+          `Placement anchor region not found: ${semanticNode.semanticId} -> ${placementAnchor.placementRegionId}`,
+        )
+      }
+      placementAnchorIds.add(placementAnchor.anchorId)
+    }
   }
   validateContainment(manifest, errors)
 

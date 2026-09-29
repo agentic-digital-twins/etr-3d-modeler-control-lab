@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test"
 
-test("renders and explores the validated equipment-model fixture", async ({
+test("renders the Hatteras vessel and places runtime capabilities", async ({
   page,
 }) => {
   const consoleErrors: string[] = []
@@ -10,9 +10,9 @@ test("renders and explores the validated equipment-model fixture", async ({
     }
   })
 
-  await page.goto("/")
+  await page.goto("/", { waitUntil: "domcontentloaded" })
   await expect(
-    page.getByRole("heading", { name: "Detroit Diesel 8V92TA" }),
+    page.getByRole("heading", { name: "Hatteras 63 Motor Yacht" }),
   ).toBeVisible()
 
   const canvas = page.locator("canvas")
@@ -46,12 +46,12 @@ test("renders and explores the validated equipment-model fixture", async ({
   }, screenshot.toString("base64"))
   expect(hasModelPixel).toBe(true)
 
-  await page.getByRole("button", { name: "Piston L1" }).click()
-  await expect(page.getByText("piston.l1")).toBeVisible()
-  await page.getByRole("button", { name: "Isolate" }).click()
-  await page.getByRole("button", { name: "Reset" }).click()
-  await expect(
-    page.getByText("Select a semantic component in the canvas or list."),
-  ).toBeVisible()
+  await page.getByRole("button", { name: "Flybridge" }).click()
+  await page.getByRole("button", { name: "Add capability" }).click()
+  await expect(page.getByText("Thermal Camera · Flybridge")).toBeVisible()
+  await page.getByRole("button", { name: "Water Sensor" }).click()
+  await page.getByRole("button", { name: "Engine Room" }).click()
+  await page.getByRole("button", { name: "Add capability" }).click()
+  await expect(page.getByText("Water Sensor · Engine Room")).toBeVisible()
   expect(consoleErrors).toEqual([])
 })

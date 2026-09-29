@@ -1,0 +1,2394 @@
+diff --git a/apps/equipment-viewer/src/App.test.tsx b/apps/equipment-viewer/src/App.test.tsx
+index 10e2b0d..d54779c 100644
+--- a/apps/equipment-viewer/src/App.test.tsx
++++ b/apps/equipment-viewer/src/App.test.tsx
+@@ -15,15 +15,18 @@ vi.mock("@react-three/drei", () => ({
+ }))
+ 
+ const manifest = {
+-  modelId: "detroit-diesel-8v92ta-cylinder-prototype",
+-  modelKind: "detroit-diesel-8v92ta-cylinder-assembly",
++  modelId: "hatteras-63-motor-yacht-prototype",
++  modelKind: "hatteras-63-motor-yacht",
++  modelProfile: "vessel",
+   modelVersion: "0.1.0",
+-  subjectId: "equipment-model:detroit-diesel-8v92ta-cylinder-prototype",
+-  subjectKind: "equipment-model",
++  subject: {
++    subjectId: "vessel-model:hatteras-63-motor-yacht-prototype",
++    subjectKind: "vessel-model",
++  },
+   artifact: {
+     artifactId: "fixture",
+     artifactVersion: "0.1.0",
+-    fileName: "fixture.glb",
++    fileName: "hatteras-63-motor-yacht.glb",
+     contentFingerprint: `sha256:${"a".repeat(64)}`,
+   },
+   generator: { name: "fixture", version: "0.1.0", sourceRevision: "test" },
+@@ -34,19 +37,73 @@ const manifest = {
+   generatedAt: "2026-09-21T00:00:00.000Z",
+   exportedAt: "2026-09-21T00:00:00.000Z",
+   validatedAt: "2026-09-21T00:00:00.000Z",
+-  components: [
++  semanticNodes: [
++    {
++      semanticId: "vessel.hatteras-63",
++      semanticKind: "vessel",
++      semanticRole: "motor-yacht",
++      displayName: "Hatteras 63 Motor Yacht",
++      representation: { glbNodes: ["HatterasHull"] },
++      interactionCapabilities: ["selectable"],
++    },
+     {
+-      componentId: "piston.l1",
+-      componentKind: "piston",
+-      semanticRole: "reciprocating-element",
+-      displayName: "Piston L1",
+-      glbNodeName: "Piston_L1",
+-      capabilities: ["selectable", "isolatable"],
++      semanticId: "vessel.area.flybridge",
++      semanticKind: "area",
++      semanticRole: "vessel-area",
++      displayName: "Flybridge",
++      representation: { glbNodes: ["HatterasFlybridge"] },
++      interactionCapabilities: ["selectable", "highlightable"],
++      spatial: {
++        placementRegions: [
++          {
++            regionId: "overhead",
++            displayName: "Flybridge overhead",
++            regionKind: "placement-volume",
++            transform: { position: [0, 3, 0] },
++            dimensions: [1, 1, 1],
++          },
++        ],
++        placementAnchors: [
++          {
++            anchorId: "overhead-center",
++            displayName: "Overhead center",
++            transform: { position: [0, 3, 0] },
++            placementRegionId: "overhead",
++          },
++        ],
++      },
++    },
++    {
++      semanticId: "vessel.area.engine-room",
++      semanticKind: "area",
++      semanticRole: "vessel-area",
++      displayName: "Engine Room",
++      representation: { glbNodes: ["HatterasEngineRoom"] },
++      interactionCapabilities: ["selectable", "highlightable"],
++      spatial: {
++        placementRegions: [
++          {
++            regionId: "bilge",
++            displayName: "Engine room bilge",
++            regionKind: "placement-volume",
++            transform: { position: [0, 0, -2] },
++            dimensions: [1, 1, 1],
++          },
++        ],
++        placementAnchors: [
++          {
++            anchorId: "bilge-center",
++            displayName: "Bilge center",
++            transform: { position: [0, 0, -2] },
++            placementRegionId: "bilge",
++          },
++        ],
++      },
+     },
+   ],
+ }
+ 
+-describe("Equipment Explorer", () => {
++describe("Spatial Model Explorer", () => {
+   beforeEach(() => {
+     vi.stubGlobal(
+       "fetch",
+@@ -54,20 +111,17 @@ describe("Equipment Explorer", () => {
+     )
+   })
+ 
+-  it("loads a manifest and exposes semantic selection controls", async () => {
++  it("places capability representations through vessel area anchors", async () => {
+     render(<App />)
+ 
+-    const component = await screen.findByRole("button", { name: "Piston L1" })
+-    fireEvent.click(component)
++    await screen.findByRole("heading", { name: "Hatteras 63 Motor Yacht" })
++    fireEvent.click(screen.getByRole("button", { name: "Flybridge" }))
++    fireEvent.click(screen.getByRole("button", { name: "Add capability" }))
++    expect(screen.getByText("Thermal Camera · Flybridge")).toBeTruthy()
+ 
+-    expect(screen.getByText("piston.l1")).toBeTruthy()
+-    expect(screen.getByRole("button", { name: "Isolate" })).toHaveProperty(
+-      "disabled",
+-      false,
+-    )
+-    fireEvent.click(screen.getByRole("button", { name: "Reset" }))
+-    expect(
+-      screen.getByText("Select a semantic component in the canvas or list."),
+-    ).toBeTruthy()
++    fireEvent.click(screen.getByRole("button", { name: "Water Sensor" }))
++    fireEvent.click(screen.getByRole("button", { name: "Engine Room" }))
++    fireEvent.click(screen.getByRole("button", { name: "Add capability" }))
++    expect(screen.getByText("Water Sensor · Engine Room")).toBeTruthy()
+   })
+ })
+diff --git a/apps/equipment-viewer/src/App.tsx b/apps/equipment-viewer/src/App.tsx
+index 1ca5cea..9ec45f5 100644
+--- a/apps/equipment-viewer/src/App.tsx
++++ b/apps/equipment-viewer/src/App.tsx
+@@ -1,29 +1,85 @@
+ import { Suspense, useEffect, useState } from "react"
+ import { Bounds, OrbitControls, useGLTF } from "@react-three/drei"
+ import { Canvas, type ThreeEvent } from "@react-three/fiber"
+-import type { Object3D } from "three"
++import { Mesh, MeshStandardMaterial, type Object3D } from "three"
+ 
+ import {
+-  EquipmentModelManifestSchema,
+-  type EquipmentModelManifest,
++  SpatialModelManifestSchema,
++  type SpatialModelManifest,
+ } from "@etr/equipment-model-contracts"
+ 
+ const apiBaseUrl = import.meta.env.VITE_MODEL_API_BASE_URL ?? ""
+-const defaultModelId = "detroit-diesel-8v92ta-cylinder-prototype"
++const defaultModelId = "hatteras-63-motor-yacht-prototype"
+ 
+ type VisibilityMode = "all" | "isolated"
++type CapabilityKind = "camera.thermal" | "audio.speaker" | "sensor.water"
++type CapabilityPlacement = {
++  capability: CapabilityKind
++  areaId: string
++  anchorId: string
++}
++
++const capabilityDefinitions: Array<{
++  capability: CapabilityKind
++  displayName: string
++}> = [
++  { capability: "camera.thermal", displayName: "Thermal Camera" },
++  { capability: "audio.speaker", displayName: "Speaker" },
++  { capability: "sensor.water", displayName: "Water Sensor" },
++]
++
++function CapabilityMarker({
++  capability,
++  position,
++}: {
++  capability: CapabilityKind
++  position: [number, number, number]
++}) {
++  if (capability === "camera.thermal") {
++    return (
++      <group position={position}>
++        <mesh rotation={[Math.PI / 2, 0, 0]}>
++          <cylinderGeometry args={[0.14, 0.14, 0.35, 16]} />
++          <meshStandardMaterial color="#f4b763" emissive="#6f4219" />
++        </mesh>
++        <mesh position={[0, 0, 0.22]}>
++          <sphereGeometry args={[0.11, 16, 16]} />
++          <meshStandardMaterial color="#152830" emissive="#163f4e" />
++        </mesh>
++      </group>
++    )
++  }
++
++  if (capability === "audio.speaker") {
++    return (
++      <mesh position={position} rotation={[Math.PI / 2, 0, 0]}>
++        <cylinderGeometry args={[0.18, 0.18, 0.12, 20]} />
++        <meshStandardMaterial color="#d76d3e" emissive="#6f2918" />
++      </mesh>
++    )
++  }
++
++  return (
++    <mesh position={position}>
++      <boxGeometry args={[0.22, 0.12, 0.22]} />
++      <meshStandardMaterial color="#58a6a2" emissive="#164442" />
++    </mesh>
++  )
++}
+ 
+ function Model({
+   manifest,
+-  selectedComponentId,
++  selectedSemanticId,
++  activeAreaId,
+   visibilityMode,
+   onSelect,
+   onReady,
+ }: {
+-  manifest: EquipmentModelManifest
+-  selectedComponentId?: string
++  manifest: SpatialModelManifest
++  selectedSemanticId?: string
++  activeAreaId?: string
+   visibilityMode: VisibilityMode
+-  onSelect: (componentId: string) => void
++  onSelect: (semanticId: string) => void
+   onReady: () => void
+ }) {
+   const { scene } = useGLTF(
+@@ -32,14 +88,39 @@ function Model({
+ 
+   useEffect(() => {
+     scene.traverse((node: Object3D) => {
+-      const component = manifest.components.find(
+-        (candidate) => candidate.glbNodeName === node.name,
++      if (
++        node instanceof Mesh &&
++        node.material instanceof MeshStandardMaterial
++      ) {
++        node.material = node.material.clone()
++      }
++    })
++  }, [scene])
++
++  useEffect(() => {
++    scene.traverse((node: Object3D) => {
++      const semanticNode = manifest.semanticNodes.find((candidate) =>
++        candidate.representation.glbNodes.includes(node.name),
+       )
+       node.visible =
+         visibilityMode === "all" ||
+-        component?.componentId === selectedComponentId
++        semanticNode?.semanticId === selectedSemanticId
++      if (
++        node instanceof Mesh &&
++        node.material instanceof MeshStandardMaterial
++      ) {
++        const isActiveArea = semanticNode?.semanticId === activeAreaId
++        node.material.color.set(isActiveArea ? "#f4b763" : "#418da2")
++        node.material.emissive.set(isActiveArea ? "#6f4219" : "#000000")
++      }
+     })
+-  }, [manifest.components, scene, selectedComponentId, visibilityMode])
++  }, [
++    activeAreaId,
++    manifest.semanticNodes,
++    scene,
++    selectedSemanticId,
++    visibilityMode,
++  ])
+ 
+   useEffect(() => {
+     onReady()
+@@ -50,11 +131,11 @@ function Model({
+       object={scene}
+       onClick={(event: ThreeEvent<MouseEvent>) => {
+         event.stopPropagation()
+-        const component = manifest.components.find(
+-          (candidate) => candidate.glbNodeName === event.object.name,
++        const semanticNode = manifest.semanticNodes.find((candidate) =>
++          candidate.representation.glbNodes.includes(event.object.name),
+         )
+-        if (component) {
+-          onSelect(component.componentId)
++        if (semanticNode) {
++          onSelect(semanticNode.semanticId)
+         }
+       }}
+     />
+@@ -62,8 +143,12 @@ function Model({
+ }
+ 
+ export function App() {
+-  const [manifest, setManifest] = useState<EquipmentModelManifest>()
+-  const [selectedComponentId, setSelectedComponentId] = useState<string>()
++  const [manifest, setManifest] = useState<SpatialModelManifest>()
++  const [selectedSemanticId, setSelectedSemanticId] = useState<string>()
++  const [activeAreaId, setActiveAreaId] = useState<string>()
++  const [selectedCapability, setSelectedCapability] =
++    useState<CapabilityKind>("camera.thermal")
++  const [placements, setPlacements] = useState<CapabilityPlacement[]>([])
+   const [visibilityMode, setVisibilityMode] = useState<VisibilityMode>("all")
+   const [isArtifactReady, setIsArtifactReady] = useState(false)
+   const [error, setError] = useState<string>()
+@@ -80,7 +165,7 @@ export function App() {
+         if (!response.ok) {
+           throw new Error(`Model API returned ${response.status}`)
+         }
+-        setManifest(EquipmentModelManifestSchema.parse(await response.json()))
++        setManifest(SpatialModelManifestSchema.parse(await response.json()))
+       } catch (loadError) {
+         if (!controller.signal.aborted) {
+           setError(
+@@ -96,60 +181,108 @@ export function App() {
+     return () => controller.abort()
+   }, [])
+ 
+-  const selectedComponent = manifest?.components.find(
+-    (component) => component.componentId === selectedComponentId,
++  const selectedSemanticNode = manifest?.semanticNodes.find(
++    (semanticNode) => semanticNode.semanticId === selectedSemanticId,
++  )
++  const areas = manifest?.semanticNodes.filter(
++    (semanticNode) => semanticNode.semanticKind === "area",
++  )
++  const activeArea = areas?.find(
++    (semanticNode) => semanticNode.semanticId === activeAreaId,
+   )
+ 
+   if (error) {
+     return (
+       <main className="state-panel">
+-        <h1>Equipment Explorer</h1>
++        <h1>Spatial Model Explorer</h1>
+         <p>{error}</p>
+       </main>
+     )
+   }
+ 
+-  if (!manifest) {
++  if (!manifest || !areas) {
+     return (
+       <main className="state-panel">
+-        <h1>Equipment Explorer</h1>
++        <h1>Spatial Model Explorer</h1>
+         <p>Loading validated model artifact...</p>
+       </main>
+     )
+   }
+ 
++  function selectSemanticNode(semanticId: string) {
++    const semanticNode = manifest?.semanticNodes.find(
++      (candidate) => candidate.semanticId === semanticId,
++    )
++    setSelectedSemanticId(semanticId)
++    setVisibilityMode("all")
++    if (semanticNode?.semanticKind === "area") {
++      setActiveAreaId(semanticId)
++    }
++  }
++
++  function addCapability() {
++    const anchor = activeArea?.spatial?.placementAnchors[0]
++    if (!activeArea || !anchor) {
++      return
++    }
++    setPlacements((current) => [
++      ...current,
++      {
++        capability: selectedCapability,
++        areaId: activeArea.semanticId,
++        anchorId: anchor.anchorId,
++      },
++    ])
++  }
++
+   return (
+     <main className="workbench">
+       <header>
+         <div>
+-          <p className="eyebrow">Equipment Explorer</p>
+-          <h1>Detroit Diesel 8V92TA</h1>
++          <p className="eyebrow">Spatial Model Explorer</p>
++          <h1>
++            {manifest.semanticNodes[0]?.displayName ?? manifest.modelKind}
++          </h1>
+         </div>
+         <p className="artifact">
+-          {manifest.artifact.artifactVersion} · validated fixture
++          {manifest.modelProfile} · {manifest.artifact.artifactVersion} ·
++          validated fixture
+         </p>
+       </header>
+       <section
+         className="canvas-shell"
+-        aria-label="Interactive equipment model"
++        aria-label="Interactive vessel model"
+         data-artifact-ready={isArtifactReady}
+       >
+-        <Canvas camera={{ position: [0, 0, 2.5], fov: 45 }}>
++        <Canvas camera={{ position: [8, 6, 9], fov: 45 }}>
+           <color attach="background" args={["#dfe7e5"]} />
+           <ambientLight intensity={1.5} />
+           <directionalLight position={[2, 3, 4]} intensity={2} />
+-          <Bounds fit clip observe margin={1.8}>
++          <Bounds fit clip observe margin={1.5}>
+             <Suspense fallback={null}>
+               <Model
+                 manifest={manifest}
+-                selectedComponentId={selectedComponentId}
++                selectedSemanticId={selectedSemanticId}
++                activeAreaId={activeAreaId}
+                 visibilityMode={visibilityMode}
+-                onSelect={(componentId) => {
+-                  setSelectedComponentId(componentId)
+-                  setVisibilityMode("all")
+-                }}
++                onSelect={selectSemanticNode}
+                 onReady={() => setIsArtifactReady(true)}
+               />
++              {placements.map((placement, index) => {
++                const area = areas.find(
++                  (candidate) => candidate.semanticId === placement.areaId,
++                )
++                const anchor = area?.spatial?.placementAnchors.find(
++                  (candidate) => candidate.anchorId === placement.anchorId,
++                )
++                return anchor ? (
++                  <CapabilityMarker
++                    capability={placement.capability}
++                    key={`${placement.capability}-${placement.areaId}-${index}`}
++                    position={anchor.transform.position}
++                  />
++                ) : null
++              })}
+             </Suspense>
+           </Bounds>
+           <OrbitControls makeDefault />
+@@ -157,31 +290,70 @@ export function App() {
+       </section>
+       <aside className="controls">
+         <section>
+-          <h2>Components</h2>
++          <h2>Capability</h2>
+           <div className="component-list">
+-            {manifest.components.map((component) => (
++            {capabilityDefinitions.map((definition) => (
+               <button
+                 className={
+-                  component.componentId === selectedComponentId
+-                    ? "selected"
+-                    : ""
++                  definition.capability === selectedCapability ? "selected" : ""
+                 }
+-                key={component.componentId}
+-                onClick={() => {
+-                  setSelectedComponentId(component.componentId)
+-                  setVisibilityMode("all")
+-                }}
++                key={definition.capability}
++                onClick={() => setSelectedCapability(definition.capability)}
+               >
+-                {component.displayName}
++                {definition.displayName}
+               </button>
+             ))}
+           </div>
+         </section>
++        <section>
++          <h2>Area</h2>
++          <div className="component-list">
++            {areas.map((area) => (
++              <button
++                className={area.semanticId === activeAreaId ? "selected" : ""}
++                key={area.semanticId}
++                onClick={() => selectSemanticNode(area.semanticId)}
++              >
++                {area.displayName}
++              </button>
++            ))}
++          </div>
++        </section>
++        <section>
++          <h2>Configuration</h2>
++          <div className="command-row">
++            <button disabled={!activeArea} onClick={addCapability}>
++              Add capability
++            </button>
++            <button onClick={() => setPlacements([])}>Clear placements</button>
++          </div>
++          {placements.length > 0 ? (
++            <ul className="placement-list">
++              {placements.map((placement, index) => {
++                const definition = capabilityDefinitions.find(
++                  (candidate) => candidate.capability === placement.capability,
++                )
++                const area = areas.find(
++                  (candidate) => candidate.semanticId === placement.areaId,
++                )
++                return (
++                  <li
++                    key={`${placement.areaId}-${placement.anchorId}-${index}`}
++                  >
++                    {definition?.displayName} · {area?.displayName}
++                  </li>
++                )
++              })}
++            </ul>
++          ) : (
++            <p>Select a capability and area to create a placement.</p>
++          )}
++        </section>
+         <section>
+           <h2>View</h2>
+           <div className="command-row">
+             <button
+-              disabled={!selectedComponentId}
++              disabled={!selectedSemanticId}
+               onClick={() => setVisibilityMode("isolated")}
+             >
+               Isolate
+@@ -189,7 +361,8 @@ export function App() {
+             <button onClick={() => setVisibilityMode("all")}>Show all</button>
+             <button
+               onClick={() => {
+-                setSelectedComponentId(undefined)
++                setSelectedSemanticId(undefined)
++                setActiveAreaId(undefined)
+                 setVisibilityMode("all")
+               }}
+             >
+@@ -199,17 +372,19 @@ export function App() {
+         </section>
+         <section className="details">
+           <h2>Selection</h2>
+-          {selectedComponent ? (
++          {selectedSemanticNode ? (
+             <dl>
+-              <dt>Component</dt>
+-              <dd>{selectedComponent.componentId}</dd>
++              <dt>Semantic node</dt>
++              <dd>{selectedSemanticNode.semanticId}</dd>
+               <dt>Role</dt>
+-              <dd>{selectedComponent.semanticRole}</dd>
+-              <dt>Capabilities</dt>
+-              <dd>{selectedComponent.capabilities.join(", ")}</dd>
++              <dd>{selectedSemanticNode.semanticRole}</dd>
++              <dt>Anchor</dt>
++              <dd>
++                {activeArea?.spatial?.placementAnchors[0]?.anchorId ?? "None"}
++              </dd>
+             </dl>
+           ) : (
+-            <p>Select a semantic component in the canvas or list.</p>
++            <p>Select a semantic node in the canvas or list.</p>
+           )}
+         </section>
+       </aside>
+diff --git a/apps/equipment-viewer/src/styles.css b/apps/equipment-viewer/src/styles.css
+index bb888fa..35c1197 100644
+--- a/apps/equipment-viewer/src/styles.css
++++ b/apps/equipment-viewer/src/styles.css
+@@ -85,6 +85,12 @@ h2 {
+   flex-wrap: wrap;
+   gap: 0.5rem;
+ }
++.placement-list {
++  display: grid;
++  gap: 0.4rem;
++  margin: 0.8rem 0 0;
++  padding-left: 1.1rem;
++}
+ .details {
+   border-top: 1px solid #aebbb4;
+   padding-top: 1.25rem;
+diff --git a/apps/model-api/package.json b/apps/model-api/package.json
+index 4951c73..950b2b1 100644
+--- a/apps/model-api/package.json
++++ b/apps/model-api/package.json
+@@ -11,6 +11,7 @@
+     "test": "vitest run"
+   },
+   "dependencies": {
++    "@etr/equipment-model-contracts": "workspace:*",
+     "@etr/model-validation": "workspace:*",
+     "express": "^5.1.0"
+   },
+diff --git a/apps/model-api/src/app.test.ts b/apps/model-api/src/app.test.ts
+index cd06ed2..3cc4897 100644
+--- a/apps/model-api/src/app.test.ts
++++ b/apps/model-api/src/app.test.ts
+@@ -7,11 +7,22 @@ describe("model API", () => {
+   it("serves the validated fixture catalog and rejects unknown models", async () => {
+     const app = await createApp()
+     const catalog = await request(app).get("/api/models").expect(200)
+-    const modelId = catalog.body[0].modelId as string
++    const hatteras = catalog.body.find(
++      (model: { modelId: string }) =>
++        model.modelId === "hatteras-63-motor-yacht-prototype",
++    )
+ 
+-    expect(catalog.body).toHaveLength(1)
+-    await request(app).get(`/api/models/${modelId}/manifest`).expect(200)
+-    await request(app).get(`/api/models/${modelId}/artifact`).expect(200)
++    expect(catalog.body).toHaveLength(2)
++    expect(hatteras).toMatchObject({
++      modelKind: "hatteras-63-motor-yacht",
++      modelVersion: "0.1.0",
++    })
++    await request(app)
++      .get("/api/models/hatteras-63-motor-yacht-prototype/manifest")
++      .expect(200)
++    await request(app)
++      .get("/api/models/hatteras-63-motor-yacht-prototype/artifact")
++      .expect(200)
+     await request(app).get("/api/models/not-a-model").expect(404, {
+       error: "model_not_found",
+     })
+diff --git a/apps/model-api/src/app.ts b/apps/model-api/src/app.ts
+index 30adb13..aa149ca 100644
+--- a/apps/model-api/src/app.ts
++++ b/apps/model-api/src/app.ts
+@@ -3,72 +3,114 @@ import { dirname, resolve } from "node:path"
+ 
+ import express, { type Express } from "express"
+ 
++import type { SpatialModelManifest } from "@etr/equipment-model-contracts"
+ import { validateModel } from "@etr/model-validation"
+ 
+ const repositoryRoot = resolve(
+   dirname(fileURLToPath(import.meta.url)),
+   "../../..",
+ )
+-const fixtureDirectory = resolve(repositoryRoot, "fixtures/equipment-models")
+-const manifestPath = resolve(
+-  fixtureDirectory,
+-  "dd-8v92ta-cylinder.manifest.json",
+-)
+-const artifactPath = resolve(fixtureDirectory, "dd-8v92ta-cylinder.glb")
++const fixtures = [
++  {
++    manifestPath: resolve(
++      repositoryRoot,
++      "fixtures/equipment-models/dd-8v92ta-cylinder.manifest.json",
++    ),
++    artifactPath: resolve(
++      repositoryRoot,
++      "fixtures/equipment-models/dd-8v92ta-cylinder.glb",
++    ),
++  },
++  {
++    manifestPath: resolve(
++      repositoryRoot,
++      "fixtures/spatial-models/hatteras-63-motor-yacht.manifest.json",
++    ),
++    artifactPath: resolve(
++      repositoryRoot,
++      "fixtures/spatial-models/hatteras-63-motor-yacht.glb",
++    ),
++  },
++]
+ 
+-export async function createApp(): Promise<Express> {
+-  const validation = await validateModel(manifestPath, artifactPath)
+-  if (!validation.valid) {
+-    throw new Error(`Fixture model is invalid: ${validation.errors.join(" ")}`)
+-  }
++type ValidatedModel = {
++  manifest: SpatialModelManifest
++  artifactPath: string
++}
+ 
+-  const manifest = validation.manifest
++export async function createApp(): Promise<Express> {
++  const models: ValidatedModel[] = await Promise.all(
++    fixtures.map(async ({ manifestPath, artifactPath }) => {
++      const validation = await validateModel(manifestPath, artifactPath)
++      if (!validation.valid) {
++        throw new Error(
++          `Fixture model is invalid: ${validation.errors.join(" ")}`,
++        )
++      }
++      return { manifest: validation.manifest, artifactPath }
++    }),
++  )
+   const app = express()
+ 
+   app.get("/health", (_request, response) => {
+-    response.json({ status: "ok", capability: "equipment-model-catalog" })
++    response.json({ status: "ok", capability: "spatial-model-catalog" })
+   })
+ 
+   app.get("/api/models", (_request, response) => {
+-    response.json([
+-      {
++    response.json(
++      models.map(({ manifest }) => ({
+         modelId: manifest.modelId,
+         modelKind: manifest.modelKind,
+         modelVersion: manifest.modelVersion,
+-      },
+-    ])
++      })),
++    )
+   })
+ 
+   app.get("/api/models/:modelId", (request, response) => {
+-    if (request.params.modelId !== manifest.modelId) {
++    const model = models.find(
++      ({ manifest }) => manifest.modelId === request.params.modelId,
++    )
++    if (!model) {
+       response.status(404).json({ error: "model_not_found" })
+       return
+     }
+-    response.json(manifest)
++    response.json(model.manifest)
+   })
+ 
+   app.get("/api/models/:modelId/manifest", (request, response) => {
+-    if (request.params.modelId !== manifest.modelId) {
++    const model = models.find(
++      ({ manifest }) => manifest.modelId === request.params.modelId,
++    )
++    if (!model) {
+       response.status(404).json({ error: "model_not_found" })
+       return
+     }
+-    response.json(manifest)
++    response.json(model.manifest)
+   })
+ 
+   app.get("/api/models/:modelId/validation", (request, response) => {
+-    if (request.params.modelId !== manifest.modelId) {
++    const model = models.find(
++      ({ manifest }) => manifest.modelId === request.params.modelId,
++    )
++    if (!model) {
+       response.status(404).json({ error: "model_not_found" })
+       return
+     }
+-    response.json({ valid: true, artifactId: manifest.artifact.artifactId })
++    response.json({
++      valid: true,
++      artifactId: model.manifest.artifact.artifactId,
++    })
+   })
+ 
+   app.get("/api/models/:modelId/artifact", (request, response) => {
+-    if (request.params.modelId !== manifest.modelId) {
++    const model = models.find(
++      ({ manifest }) => manifest.modelId === request.params.modelId,
++    )
++    if (!model) {
+       response.status(404).json({ error: "model_not_found" })
+       return
+     }
+-    response.type("model/gltf-binary").sendFile(artifactPath)
++    response.type("model/gltf-binary").sendFile(model.artifactPath)
+   })
+ 
+   return app
+diff --git a/architecture/repository.yaml b/architecture/repository.yaml
+index 0746dfd..b34f02f 100644
+--- a/architecture/repository.yaml
++++ b/architecture/repository.yaml
+@@ -1,26 +1,28 @@
+ repositoryId: etr-3d-modeler-control-lab
+ repositoryKind: control-lab
+ purpose:
+-  capability: semantic-equipment-model-generation
+-  statement: Generate and validate semantically structured, web-ready equipment models.
++  capability: semantic-spatial-model-generation
++  statement: Generate and validate semantically structured, web-ready spatial models.
+ architecture:
+-  realm: equipment-modeling
+-  faculty: spatial-modeling
++  realm: spatial-modeling
++  faculty: spatial-representation
+   maturity: experimental
+ boundaries:
+   owns:
+-    - equipment-model-generation
+-    - equipment-model-semantic-contracts
+-    - equipment-model-validation
+-    - equipment-model-inspection
++    - spatial-model-generation
++    - spatial-model-semantic-contracts
++    - spatial-model-validation
++    - spatial-model-inspection
++    - spatial-representation-binding
+   doesNotOwn:
+-    - operational-equipment-state
++    - physical-operational-state
+     - telemetry-truth
++    - installed-capability-truth
+     - alert-lifecycle
+     - maintenance-truth
+     - chief-decision-authority
+ subjects:
+-  - subjectKind: equipment-model
++  - subjectKind: spatial-model
+ firstCustomer: Detroit Diesel 8V92TA Equipment Explorer
+ integrations:
+   current: []
+diff --git a/fixtures/equipment-models/dd-8v92ta-cylinder.manifest.json b/fixtures/equipment-models/dd-8v92ta-cylinder.manifest.json
+index 82eac20..0476b28 100644
+--- a/fixtures/equipment-models/dd-8v92ta-cylinder.manifest.json
++++ b/fixtures/equipment-models/dd-8v92ta-cylinder.manifest.json
+@@ -1,9 +1,12 @@
+ {
+   "modelId": "detroit-diesel-8v92ta-cylinder-prototype",
+   "modelKind": "detroit-diesel-8v92ta-cylinder-assembly",
++  "modelProfile": "equipment",
+   "modelVersion": "0.1.0",
+-  "subjectId": "equipment-model:detroit-diesel-8v92ta-cylinder-prototype",
+-  "subjectKind": "equipment-model",
++  "subject": {
++    "subjectId": "equipment-model:detroit-diesel-8v92ta-cylinder-prototype",
++    "subjectKind": "equipment-model"
++  },
+   "artifact": {
+     "artifactId": "detroit-diesel-8v92ta-cylinder-prototype-fixture",
+     "artifactVersion": "0.1.0",
+@@ -22,23 +25,27 @@
+   "generatedAt": "2026-09-21T00:00:00.000Z",
+   "exportedAt": "2026-09-21T00:00:00.000Z",
+   "validatedAt": "2026-09-21T00:00:00.000Z",
+-  "components": [
++  "semanticNodes": [
+     {
+-      "componentId": "cylinder.l1",
+-      "componentKind": "cylinder-assembly",
++      "semanticId": "cylinder.l1",
++      "semanticKind": "cylinder-assembly",
+       "semanticRole": "cylinder",
+       "displayName": "Cylinder L1",
+-      "glbNodeName": "Cylinder_L1",
+-      "capabilities": ["selectable", "highlightable", "isolatable"]
++      "representation": {
++        "glbNodes": ["Cylinder_L1"]
++      },
++      "interactionCapabilities": ["selectable", "highlightable", "isolatable"]
+     },
+     {
+-      "componentId": "piston.l1",
+-      "componentKind": "piston",
++      "semanticId": "piston.l1",
++      "semanticKind": "piston",
+       "semanticRole": "reciprocating-element",
+       "displayName": "Piston L1",
+-      "parentComponentId": "cylinder.l1",
+-      "glbNodeName": "Piston_L1",
+-      "capabilities": [
++      "parentSemanticId": "cylinder.l1",
++      "representation": {
++        "glbNodes": ["Piston_L1"]
++      },
++      "interactionCapabilities": [
+         "selectable",
+         "highlightable",
+         "isolatable",
+diff --git a/fixtures/spatial-models/hatteras-63-motor-yacht.glb b/fixtures/spatial-models/hatteras-63-motor-yacht.glb
+new file mode 100644
+index 0000000000000000000000000000000000000000..9cb3d30733ab8f240c193670b045d1920b1530b3
+GIT binary patch
+literal 1568
+zcmZ`(*-qmy6g6dFegpa0iLx|p>B|T@AV5Gz6!FsG!3}O|k;YZxvZ(6+%wNo}&9Re0
+z2aF=y@m<cnzFU^xp0)@f2m6Hl-Xr8<G`wC>UR6TV{)#?{vXZKxeH!@zWi%6oD7jW8
+zD2o}dgco@;t~H32H<d4XSqkr6Xw7JqLWTB&=C7jt@roAeL72aQg)Cw*YqNxPSoeN?
+z&)#^D;&W)yvj+ccndfj}E~;6B$8+$<ZNJ9?tkCa5U6;J5a;~k{FcA0=3+~tK6WkS-
+z#ZQqwx*?(DhXylA9H5~a@-%;)l=2}HU*Q7I;3mM09I%n!HT)=X`FpIMU9Lv<^=$(g
+zyIc+YE{nf_9Pu2vb%ZqXV`K(Sx)2d(<^_K2a`G(#E>z&*b+O6Tq2u+jkFX*xj$EA-
+znJmPOQuD8I+feQ~U_nioXNtoCJW%Q5LTWc^oePAa?SKuL7yC#QSf(OvIj`uVlyj-&
+zQ*%Y-mU6Px=DMQ4hNJV_^WinBcg?6Q9%O15ArLq^Nb=lpYRHCAx65KuUJ1?fT&6c_
+znav7OS-=SzaG-Kkp7PZ8<QVbmAPz|vTL(2^y{k1hGPeF`xxslSx0AJb&15;9qU&v+
+zPF}UR6h)@dabc(T&c2i4xe>AAwjqu5a5}Z41O2|OeAq!}@-j11C2k*fB9n{S(kE3T
+zyRF-e{@0C-8$3nqDz)*`I$@l$XsMbnR3Qp|`?|n{NJ0dKrfONhdJkZhO7Bhvu}Qqd
+zcpIajQ6-zrgpI$L0c9K36hhsTwac|3<n6Pe_{~sko?KfR4UR64ZYWZF@CUQ@`1~3>
+z`Mb4#eE9!(|0uiRn{#^^x#qq@%v^7gUGk0WlRfO;aT1&u^H@9h_CVReYT?@lzlCMw
+JiQRW``v=TIyFdT{
+
+literal 0
+HcmV?d00001
+
+diff --git a/fixtures/spatial-models/hatteras-63-motor-yacht.manifest.json b/fixtures/spatial-models/hatteras-63-motor-yacht.manifest.json
+new file mode 100644
+index 0000000..461524f
+--- /dev/null
++++ b/fixtures/spatial-models/hatteras-63-motor-yacht.manifest.json
+@@ -0,0 +1,355 @@
++{
++  "modelId": "hatteras-63-motor-yacht-prototype",
++  "modelKind": "hatteras-63-motor-yacht",
++  "modelProfile": "vessel",
++  "modelVersion": "0.1.0",
++  "subject": {
++    "subjectId": "vessel-model:hatteras-63-motor-yacht-prototype",
++    "subjectKind": "vessel-model"
++  },
++  "artifact": {
++    "artifactId": "hatteras-63-motor-yacht-prototype-fixture",
++    "artifactVersion": "0.1.0",
++    "fileName": "hatteras-63-motor-yacht.glb",
++    "contentFingerprint": "sha256:158dc5d4983f73ac171b121e5d9477c3ae991bb281ef3f60b92baef9b3b82c74"
++  },
++  "generator": {
++    "name": "phase-2-hatteras-fixture-generator",
++    "version": "0.1.0",
++    "sourceRevision": "phase-2-slice-1"
++  },
++  "sourceReferences": [],
++  "coordinateFrame": "right-handed-y-up",
++  "placementCoordinateFrame": "model",
++  "units": "meters",
++  "createdAt": "2026-09-28T00:00:00.000Z",
++  "generatedAt": "2026-09-28T00:00:00.000Z",
++  "exportedAt": "2026-09-28T00:00:00.000Z",
++  "validatedAt": "2026-09-28T00:00:00.000Z",
++  "semanticNodes": [
++    {
++      "semanticId": "vessel.hatteras-63",
++      "semanticKind": "vessel",
++      "semanticRole": "motor-yacht",
++      "displayName": "Hatteras 63 Motor Yacht",
++      "representation": {
++        "glbNodes": [
++          "HatterasHull"
++        ]
++      },
++      "interactionCapabilities": [
++        "selectable"
++      ]
++    },
++    {
++      "semanticId": "vessel.level.main-deck",
++      "semanticKind": "level",
++      "semanticRole": "main-deck",
++      "displayName": "Main Deck",
++      "parentSemanticId": "vessel.hatteras-63",
++      "representation": {
++        "glbNodes": [
++          "HatterasMainDeck"
++        ]
++      },
++      "interactionCapabilities": [
++        "selectable"
++      ]
++    },
++    {
++      "semanticId": "vessel.level.flybridge",
++      "semanticKind": "level",
++      "semanticRole": "flybridge-deck",
++      "displayName": "Flybridge Deck",
++      "parentSemanticId": "vessel.hatteras-63",
++      "representation": {
++        "glbNodes": [
++          "HatterasFlybridgeDeck"
++        ]
++      },
++      "interactionCapabilities": [
++        "selectable"
++      ]
++    },
++    {
++      "semanticId": "vessel.area.bow",
++      "semanticKind": "area",
++      "semanticRole": "vessel-area",
++      "displayName": "Bow",
++      "parentSemanticId": "vessel.level.main-deck",
++      "representation": {
++        "glbNodes": [
++          "HatterasBow"
++        ]
++      },
++      "interactionCapabilities": [
++        "selectable",
++        "highlightable"
++      ],
++      "spatial": {
++        "placementRegions": [
++          {
++            "regionId": "deck",
++            "displayName": "Bow deck",
++            "regionKind": "placement-volume",
++            "transform": {
++              "position": [
++                0,
++                1.15,
++                3.25
++              ]
++            },
++            "dimensions": [
++              2.5,
++              0.2,
++              1.2
++            ]
++          }
++        ],
++        "placementAnchors": [
++          {
++            "anchorId": "deck-center",
++            "displayName": "Deck center",
++            "transform": {
++              "position": [
++                0,
++                1.3,
++                3.25
++              ]
++            },
++            "placementRegionId": "deck"
++          }
++        ]
++      }
++    },
++    {
++      "semanticId": "vessel.area.flybridge",
++      "semanticKind": "area",
++      "semanticRole": "vessel-area",
++      "displayName": "Flybridge",
++      "parentSemanticId": "vessel.level.flybridge",
++      "representation": {
++        "glbNodes": [
++          "HatterasFlybridge"
++        ]
++      },
++      "interactionCapabilities": [
++        "selectable",
++        "highlightable"
++      ],
++      "spatial": {
++        "placementRegions": [
++          {
++            "regionId": "overhead",
++            "displayName": "Flybridge overhead",
++            "regionKind": "placement-volume",
++            "transform": {
++              "position": [
++                0,
++                3.55,
++                0.2
++              ]
++            },
++            "dimensions": [
++              2.2,
++              0.25,
++              1.6
++            ]
++          }
++        ],
++        "placementAnchors": [
++          {
++            "anchorId": "overhead-port",
++            "displayName": "Overhead port",
++            "transform": {
++              "position": [
++                -0.65,
++                3.7,
++                0.2
++              ]
++            },
++            "placementRegionId": "overhead"
++          },
++          {
++            "anchorId": "overhead-center",
++            "displayName": "Overhead center",
++            "transform": {
++              "position": [
++                0,
++                3.7,
++                0.2
++              ]
++            },
++            "placementRegionId": "overhead"
++          },
++          {
++            "anchorId": "helm",
++            "displayName": "Helm",
++            "transform": {
++              "position": [
++                0,
++                3.45,
++                0.65
++              ]
++            },
++            "placementRegionId": "overhead"
++          }
++        ]
++      }
++    },
++    {
++      "semanticId": "vessel.area.salon",
++      "semanticKind": "area",
++      "semanticRole": "vessel-area",
++      "displayName": "Salon",
++      "parentSemanticId": "vessel.level.main-deck",
++      "representation": {
++        "glbNodes": [
++          "HatterasSalon"
++        ]
++      },
++      "interactionCapabilities": [
++        "selectable",
++        "highlightable"
++      ],
++      "spatial": {
++        "placementRegions": [
++          {
++            "regionId": "ceiling",
++            "displayName": "Salon ceiling",
++            "regionKind": "placement-volume",
++            "transform": {
++              "position": [
++                0,
++                2.65,
++                -0.3
++              ]
++            },
++            "dimensions": [
++              3.8,
++              0.2,
++              2
++            ]
++          }
++        ],
++        "placementAnchors": [
++          {
++            "anchorId": "ceiling-center",
++            "displayName": "Ceiling center",
++            "transform": {
++              "position": [
++                0,
++                2.8,
++                -0.3
++              ]
++            },
++            "placementRegionId": "ceiling"
++          }
++        ]
++      }
++    },
++    {
++      "semanticId": "vessel.area.engine-room",
++      "semanticKind": "area",
++      "semanticRole": "vessel-area",
++      "displayName": "Engine Room",
++      "parentSemanticId": "vessel.level.main-deck",
++      "representation": {
++        "glbNodes": [
++          "HatterasEngineRoom"
++        ]
++      },
++      "interactionCapabilities": [
++        "selectable",
++        "highlightable"
++      ],
++      "spatial": {
++        "placementRegions": [
++          {
++            "regionId": "bilge",
++            "displayName": "Engine room bilge",
++            "regionKind": "placement-volume",
++            "transform": {
++              "position": [
++                0,
++                0.55,
++                -1.7
++              ]
++            },
++            "dimensions": [
++              1.8,
++              0.2,
++              1.2
++            ]
++          }
++        ],
++        "placementAnchors": [
++          {
++            "anchorId": "bilge-center",
++            "displayName": "Bilge center",
++            "transform": {
++              "position": [
++                0,
++                0.65,
++                -1.7
++              ]
++            },
++            "placementRegionId": "bilge"
++          }
++        ]
++      }
++    },
++    {
++      "semanticId": "vessel.area.cockpit",
++      "semanticKind": "area",
++      "semanticRole": "vessel-area",
++      "displayName": "Cockpit",
++      "parentSemanticId": "vessel.level.main-deck",
++      "representation": {
++        "glbNodes": [
++          "HatterasCockpit"
++        ]
++      },
++      "interactionCapabilities": [
++        "selectable",
++        "highlightable"
++      ],
++      "spatial": {
++        "placementRegions": [
++          {
++            "regionId": "aft-deck",
++            "displayName": "Aft deck",
++            "regionKind": "placement-volume",
++            "transform": {
++              "position": [
++                0,
++                1.2,
++                -3.5
++              ]
++            },
++            "dimensions": [
++              2.5,
++              0.2,
++              2
++            ]
++          }
++        ],
++        "placementAnchors": [
++          {
++            "anchorId": "aft-center",
++            "displayName": "Aft center",
++            "transform": {
++              "position": [
++                0,
++                1.35,
++                -3.5
++              ]
++            },
++            "placementRegionId": "aft-deck"
++          }
++        ]
++      }
++    }
++  ],
++  "modelReferences": []
++}
+diff --git a/models/README.md b/models/README.md
+new file mode 100644
+index 0000000..078d888
+--- /dev/null
++++ b/models/README.md
+@@ -0,0 +1,13 @@
++# Spatial model sources
++
++`models/` contains authored source truth for spatial models. Organize each model as:
++
++```text
++models/<model-kind>/<model-id>/
++  model.json
++  semantic.manifest.json
++  geometry/
++  sources/
++```
++
++Generated artifacts used only for validation and acceptance remain under `fixtures/`. Runtime and customer configuration, including installed capability instances, do not belong in either location.
+diff --git a/packages/equipment-model-contracts/src/index.ts b/packages/equipment-model-contracts/src/index.ts
+index fd8be73..b65d170 100644
+--- a/packages/equipment-model-contracts/src/index.ts
++++ b/packages/equipment-model-contracts/src/index.ts
+@@ -24,6 +24,100 @@ export const SourceReferenceSchema = z.object({
+   role: z.string().min(1),
+ })
+ 
++const InteractionCapabilitySchema = z.enum([
++  "selectable",
++  "highlightable",
++  "isolatable",
++  "animatable",
++])
++
++export const SpatialTransformSchema = z.object({
++  position: z.tuple([z.number(), z.number(), z.number()]),
++  rotation: z.tuple([z.number(), z.number(), z.number()]).optional(),
++  scale: z.tuple([z.number(), z.number(), z.number()]).optional(),
++})
++
++export const PlacementRegionSchema = z.object({
++  regionId: z.string().min(1),
++  displayName: z.string().min(1),
++  regionKind: z.string().min(1),
++  transform: SpatialTransformSchema,
++  dimensions: z.tuple([
++    z.number().positive(),
++    z.number().positive(),
++    z.number().positive(),
++  ]),
++})
++
++export const PlacementAnchorSchema = z.object({
++  anchorId: z.string().min(1),
++  displayName: z.string().min(1),
++  transform: SpatialTransformSchema,
++  placementRegionId: z.string().min(1).optional(),
++})
++
++export const SpatialSemanticNodeSchema = z.object({
++  semanticId: z.string().min(1),
++  semanticKind: z.string().min(1),
++  semanticRole: z.string().min(1),
++  displayName: z.string().min(1),
++  parentSemanticId: z.string().min(1).optional(),
++  representation: z.object({
++    glbNodes: z.array(z.string().min(1)).min(1),
++  }),
++  interactionCapabilities: z.array(InteractionCapabilitySchema).default([]),
++  spatial: z
++    .object({
++      placementRegions: z.array(PlacementRegionSchema).default([]),
++      placementAnchors: z.array(PlacementAnchorSchema).default([]),
++    })
++    .optional(),
++})
++
++export const SpatialModelReferenceSchema = z.object({
++  modelId: z.string().min(1),
++  instanceId: z.string().min(1),
++  parentSemanticId: z.string().min(1),
++  transform: SpatialTransformSchema,
++})
++
++export const SpatialModelManifestSchema = z.object({
++  modelId: z.string().min(1),
++  modelKind: z.string().min(1),
++  modelProfile: z.string().min(1),
++  modelVersion: z.string().min(1),
++  subject: z.object({
++    subjectId: z.string().min(1),
++    subjectKind: z.string().min(1),
++  }),
++  artifact: z.object({
++    artifactId: z.string().min(1),
++    artifactVersion: z.string().min(1),
++    fileName: z.string().endsWith(".glb"),
++    contentFingerprint: z.string().regex(/^sha256:[a-f0-9]{64}$/),
++  }),
++  generator: z.object({
++    name: z.string().min(1),
++    version: z.string().min(1),
++    sourceRevision: z.string().min(1),
++  }),
++  sourceReferences: z.array(SourceReferenceSchema).default([]),
++  coordinateFrame: z.string().min(1),
++  placementCoordinateFrame: z.literal("model").default("model"),
++  units: z.string().min(1),
++  createdAt: z.string().datetime(),
++  generatedAt: z.string().datetime(),
++  exportedAt: z.string().datetime(),
++  validatedAt: z.string().datetime(),
++  semanticNodes: z.array(SpatialSemanticNodeSchema).min(1),
++  modelReferences: z.array(SpatialModelReferenceSchema).default([]),
++})
++
++export type SpatialModelManifest = z.infer<typeof SpatialModelManifestSchema>
++export type SpatialSemanticNode = z.infer<typeof SpatialSemanticNodeSchema>
++export type PlacementRegion = z.infer<typeof PlacementRegionSchema>
++export type PlacementAnchor = z.infer<typeof PlacementAnchorSchema>
++
+ export const EquipmentComponentSchema = z.object({
+   componentId: z.string().min(1),
+   componentKind: z.string().min(1),
+@@ -31,9 +125,7 @@ export const EquipmentComponentSchema = z.object({
+   displayName: z.string().min(1),
+   parentComponentId: z.string().min(1).optional(),
+   glbNodeName: z.string().min(1),
+-  capabilities: z
+-    .array(z.enum(["selectable", "highlightable", "isolatable", "animatable"]))
+-    .default([]),
++  capabilities: z.array(InteractionCapabilitySchema).default([]),
+ })
+ 
+ export const EquipmentModelManifestSchema = z.object({
+diff --git a/packages/model-validation/src/cli.ts b/packages/model-validation/src/cli.ts
+index a931622..51f8a50 100644
+--- a/packages/model-validation/src/cli.ts
++++ b/packages/model-validation/src/cli.ts
+@@ -14,13 +14,13 @@ if (!manifestPath || !artifactPath) {
+   )
+ 
+   if (!report.valid) {
+-    console.error("Equipment model contract: invalid")
++    console.error("Spatial model contract: invalid")
+     console.error(report.errors.join("\n"))
+     process.exitCode = 1
+   } else {
+-    console.log("Equipment model contract: valid")
++    console.log("Spatial model contract: valid")
+     console.log(`Model kind: ${report.manifest.modelKind}`)
+-    console.log(`Components: ${report.manifest.components.length}`)
++    console.log(`Semantic nodes: ${report.manifest.semanticNodes.length}`)
+     console.log("READY")
+   }
+ }
+diff --git a/packages/model-validation/src/index.test.ts b/packages/model-validation/src/index.test.ts
+index 501e038..1d51ea0 100644
+--- a/packages/model-validation/src/index.test.ts
++++ b/packages/model-validation/src/index.test.ts
+@@ -16,6 +16,10 @@ const fixtureManifest = join(
+   "dd-8v92ta-cylinder.manifest.json",
+ )
+ const fixtureArtifact = join(fixtureDirectory, "dd-8v92ta-cylinder.glb")
++const hatterasFixtureDirectory = join(
++  import.meta.dirname,
++  "../../../fixtures/spatial-models",
++)
+ const temporaryDirectories: string[] = []
+ 
+ async function createFixture(): Promise<{
+@@ -70,6 +74,105 @@ describe("validateModel", () => {
+     ).resolves.toMatchObject({ valid: true })
+   })
+ 
++  it("accepts the checked-in Hatteras vessel fixture", async () => {
++    const report = await validateModel(
++      join(hatterasFixtureDirectory, "hatteras-63-motor-yacht.manifest.json"),
++      join(hatterasFixtureDirectory, "hatteras-63-motor-yacht.glb"),
++    )
++
++    expect(report).toMatchObject({ valid: true })
++    if (report.valid) {
++      expect(report.manifest.placementCoordinateFrame).toBe("model")
++    }
++  })
++
++  it("rejects an unsupported placement coordinate frame", async () => {
++    const { manifestPath, artifactPath } = await createFixture()
++    await mutateManifest(manifestPath, (manifest) => {
++      manifest.placementCoordinateFrame = "placement-region"
++    })
++
++    const report = await validateModel(manifestPath, artifactPath)
++
++    expect(report).toMatchObject({ valid: false })
++    if (!report.valid) {
++      expect(report.errors).toContain('Invalid literal value, expected "model"')
++    }
++  })
++
++  it("accepts multiple representation nodes, placement anchors, and model references", async () => {
++    const { manifestPath, artifactPath } = await createFixture()
++    await mutateManifest(manifestPath, (manifest) => {
++      manifest.semanticNodes = [
++        {
++          ...manifest.semanticNodes[0],
++          representation: { glbNodes: ["Cylinder_L1", "Piston_L1"] },
++          spatial: {
++            placementRegions: [
++              {
++                regionId: "service-surface",
++                displayName: "Service surface",
++                regionKind: "surface",
++                transform: { position: [0, 0, 0] },
++                dimensions: [1, 1, 1],
++              },
++            ],
++            placementAnchors: [
++              {
++                anchorId: "service-center",
++                displayName: "Service center",
++                placementRegionId: "service-surface",
++                transform: { position: [0, 0, 0] },
++              },
++            ],
++          },
++        },
++      ]
++      manifest.modelReferences = [
++        {
++          modelId: "sensor-model",
++          instanceId: "sensor.service",
++          parentSemanticId: "cylinder.l1",
++          transform: { position: [0, 0, 0] },
++        },
++      ]
++    })
++
++    await expect(
++      validateModel(manifestPath, artifactPath),
++    ).resolves.toMatchObject({ valid: true })
++  })
++
++  it("rejects duplicate placement anchors within a semantic node", async () => {
++    const { manifestPath, artifactPath } = await createFixture()
++    await mutateManifest(manifestPath, (manifest) => {
++      manifest.semanticNodes[0].spatial = {
++        placementRegions: [],
++        placementAnchors: [
++          {
++            anchorId: "overhead-center",
++            displayName: "Overhead center",
++            transform: { position: [0, 0, 0] },
++          },
++          {
++            anchorId: "overhead-center",
++            displayName: "Overhead center duplicate",
++            transform: { position: [0, 1, 0] },
++          },
++        ],
++      }
++    })
++
++    const report = await validateModel(manifestPath, artifactPath)
++
++    expect(report).toMatchObject({ valid: false })
++    if (!report.valid) {
++      expect(report.errors).toContain(
++        "Duplicate placement anchor: cylinder.l1 -> overhead-center",
++      )
++    }
++  })
++
+   it("rejects an artifact whose file name differs from the manifest", async () => {
+     const { manifestPath, artifactPath } = await createFixture()
+     await mutateManifest(manifestPath, (manifest) => {
+@@ -128,11 +231,11 @@ describe("validateModel", () => {
+     const { manifestPath, artifactPath } = await createFixture()
+     await mutateManifest(manifestPath, (manifest) => {
+       manifest.artifact.contentFingerprint = "sha256:" + "0".repeat(64)
+-      manifest.components.push({
+-        ...manifest.components[0],
+-        componentId: "piston.l2",
++      manifest.semanticNodes.push({
++        ...manifest.semanticNodes[0],
++        semanticId: "piston.l2",
+       })
+-      manifest.components[1].glbNodeName = "Absent_Node"
++      manifest.semanticNodes[1].representation.glbNodes = ["Absent_Node"]
+     })
+     const report = await validateModel(manifestPath, artifactPath)
+     expect(report).toMatchObject({ valid: false })
+@@ -140,7 +243,7 @@ describe("validateModel", () => {
+       expect(report.errors).toEqual(
+         expect.arrayContaining([
+           expect.stringContaining("fingerprint"),
+-          expect.stringContaining("Duplicate glbNodeName"),
++          expect.stringContaining("Duplicate GLB node binding"),
+           expect.stringContaining("GLB node not found"),
+         ]),
+       )
+@@ -150,8 +253,8 @@ describe("validateModel", () => {
+   it("rejects invalid containment and lifecycle ordering", async () => {
+     const { manifestPath, artifactPath } = await createFixture()
+     await mutateManifest(manifestPath, (manifest) => {
+-      manifest.components[0].parentComponentId = "missing.component"
+-      manifest.components[1].parentComponentId = "piston.l1"
++      manifest.semanticNodes[0].parentSemanticId = "missing.semantic-node"
++      manifest.semanticNodes[1].parentSemanticId = "piston.l1"
+       manifest.generatedAt = "2026-09-20T00:00:00.000Z"
+     })
+     const report = await validateModel(manifestPath, artifactPath)
+@@ -159,8 +262,8 @@ describe("validateModel", () => {
+     if (!report.valid) {
+       expect(report.errors).toEqual(
+         expect.arrayContaining([
+-          expect.stringContaining("Parent component not found"),
+-          expect.stringContaining("Component cannot parent itself"),
++          expect.stringContaining("Parent semantic node not found"),
++          expect.stringContaining("Semantic node cannot parent itself"),
+           expect.stringContaining("Lifecycle timestamps"),
+         ]),
+       )
+@@ -170,7 +273,7 @@ describe("validateModel", () => {
+   it("rejects containment cycles and malformed GLB artifacts", async () => {
+     const { manifestPath, artifactPath } = await createFixture()
+     await mutateManifest(manifestPath, (manifest) => {
+-      manifest.components[0].parentComponentId = "piston.l1"
++      manifest.semanticNodes[0].parentSemanticId = "piston.l1"
+     })
+     await writeFile(artifactPath, Buffer.from("not-a-glb"))
+     const report = await validateModel(manifestPath, artifactPath)
+diff --git a/packages/model-validation/src/index.ts b/packages/model-validation/src/index.ts
+index 0f03528..7cb69ce 100644
+--- a/packages/model-validation/src/index.ts
++++ b/packages/model-validation/src/index.ts
+@@ -3,12 +3,12 @@ import { readFile } from "node:fs/promises"
+ import { basename } from "node:path"
+ 
+ import {
+-  EquipmentModelManifestSchema,
+-  type EquipmentModelManifest,
++  SpatialModelManifestSchema,
++  type SpatialModelManifest,
+ } from "@etr/equipment-model-contracts"
+ 
+ export type ValidationReport =
+-  | { valid: true; manifest: EquipmentModelManifest }
++  | { valid: true; manifest: SpatialModelManifest }
+   | { valid: false; errors: string[] }
+ 
+ function readGlbNodeNames(contents: Buffer): Set<string> {
+@@ -42,46 +42,54 @@ function readGlbNodeNames(contents: Buffer): Set<string> {
+ }
+ 
+ function validateContainment(
+-  manifest: EquipmentModelManifest,
++  manifest: SpatialModelManifest,
+   errors: string[],
+ ): void {
+-  const components = new Map(
+-    manifest.components.map((component) => [component.componentId, component]),
++  const semanticNodes = new Map(
++    manifest.semanticNodes.map((node) => [node.semanticId, node]),
+   )
+ 
+-  for (const component of manifest.components) {
+-    if (!component.parentComponentId) {
++  for (const node of manifest.semanticNodes) {
++    if (!node.parentSemanticId) {
+       continue
+     }
+-    if (component.parentComponentId === component.componentId) {
+-      errors.push(`Component cannot parent itself: ${component.componentId}`)
++    if (node.parentSemanticId === node.semanticId) {
++      errors.push(`Semantic node cannot parent itself: ${node.semanticId}`)
+       continue
+     }
+-    if (!components.has(component.parentComponentId)) {
++    if (!semanticNodes.has(node.parentSemanticId)) {
+       errors.push(
+-        `Parent component not found: ${component.componentId} -> ${component.parentComponentId}`,
++        `Parent semantic node not found: ${node.semanticId} -> ${node.parentSemanticId}`,
+       )
+     }
+   }
+ 
+-  for (const component of manifest.components) {
++  for (const node of manifest.semanticNodes) {
+     const visited = new Set<string>()
+-    let current = component
+-    while (current.parentComponentId) {
+-      if (visited.has(current.componentId)) {
++    let current = node
++    while (current.parentSemanticId) {
++      if (visited.has(current.semanticId)) {
+         errors.push(
+-          `Containment cycle detected at component: ${component.componentId}`,
++          `Containment cycle detected at semantic node: ${node.semanticId}`,
+         )
+         break
+       }
+-      visited.add(current.componentId)
+-      const parent = components.get(current.parentComponentId)
++      visited.add(current.semanticId)
++      const parent = semanticNodes.get(current.parentSemanticId)
+       if (!parent) {
+         break
+       }
+       current = parent
+     }
+   }
++
++  for (const reference of manifest.modelReferences) {
++    if (!semanticNodes.has(reference.parentSemanticId)) {
++      errors.push(
++        `Model reference parent not found: ${reference.instanceId} -> ${reference.parentSemanticId}`,
++      )
++    }
++  }
+ }
+ 
+ export async function validateModel(
+@@ -93,7 +101,7 @@ export async function validateModel(
+     readFile(manifestPath, "utf8"),
+     readFile(artifactPath),
+   ])
+-  const parsed = EquipmentModelManifestSchema.safeParse(
++  const parsed = SpatialModelManifestSchema.safeParse(
+     JSON.parse(manifestContents),
+   )
+ 
+@@ -116,7 +124,7 @@ export async function validateModel(
+     errors.push("Artifact file name does not match the supplied artifact path.")
+   }
+ 
+-  const componentIds = new Set<string>()
++  const semanticIds = new Set<string>()
+   const nodeNames = new Set<string>()
+   let artifactNodeNames = new Set<string>()
+   try {
+@@ -126,18 +134,49 @@ export async function validateModel(
+       error instanceof Error ? error.message : "Unable to inspect GLB nodes.",
+     )
+   }
+-  for (const component of manifest.components) {
+-    if (componentIds.has(component.componentId)) {
+-      errors.push(`Duplicate componentId: ${component.componentId}`)
++  for (const semanticNode of manifest.semanticNodes) {
++    if (semanticIds.has(semanticNode.semanticId)) {
++      errors.push(`Duplicate semanticId: ${semanticNode.semanticId}`)
+     }
+-    if (nodeNames.has(component.glbNodeName)) {
+-      errors.push(`Duplicate glbNodeName: ${component.glbNodeName}`)
++    for (const glbNodeName of semanticNode.representation.glbNodes) {
++      if (nodeNames.has(glbNodeName)) {
++        errors.push(`Duplicate GLB node binding: ${glbNodeName}`)
++      }
++      if (!artifactNodeNames.has(glbNodeName)) {
++        errors.push(`GLB node not found: ${glbNodeName}`)
++      }
++      nodeNames.add(glbNodeName)
++    }
++    semanticIds.add(semanticNode.semanticId)
++
++    const placementRegionIds = new Set<string>()
++    for (const placementRegion of semanticNode.spatial?.placementRegions ??
++      []) {
++      if (placementRegionIds.has(placementRegion.regionId)) {
++        errors.push(
++          `Duplicate placement region: ${semanticNode.semanticId} -> ${placementRegion.regionId}`,
++        )
++      }
++      placementRegionIds.add(placementRegion.regionId)
+     }
+-    if (!artifactNodeNames.has(component.glbNodeName)) {
+-      errors.push(`GLB node not found: ${component.glbNodeName}`)
++    const placementAnchorIds = new Set<string>()
++    for (const placementAnchor of semanticNode.spatial?.placementAnchors ??
++      []) {
++      if (placementAnchorIds.has(placementAnchor.anchorId)) {
++        errors.push(
++          `Duplicate placement anchor: ${semanticNode.semanticId} -> ${placementAnchor.anchorId}`,
++        )
++      }
++      if (
++        placementAnchor.placementRegionId &&
++        !placementRegionIds.has(placementAnchor.placementRegionId)
++      ) {
++        errors.push(
++          `Placement anchor region not found: ${semanticNode.semanticId} -> ${placementAnchor.placementRegionId}`,
++        )
++      }
++      placementAnchorIds.add(placementAnchor.anchorId)
+     }
+-    componentIds.add(component.componentId)
+-    nodeNames.add(component.glbNodeName)
+   }
+   validateContainment(manifest, errors)
+ 
+diff --git a/packages/repository-architecture/src/schema.ts b/packages/repository-architecture/src/schema.ts
+index 29d36c4..932c389 100644
+--- a/packages/repository-architecture/src/schema.ts
++++ b/packages/repository-architecture/src/schema.ts
+@@ -1,12 +1,14 @@
+ import { z } from "zod"
+ 
+ const BoundaryIdentifierSchema = z.enum([
+-  "equipment-model-generation",
+-  "equipment-model-semantic-contracts",
+-  "equipment-model-validation",
+-  "equipment-model-inspection",
+-  "operational-equipment-state",
++  "spatial-model-generation",
++  "spatial-model-semantic-contracts",
++  "spatial-model-validation",
++  "spatial-model-inspection",
++  "spatial-representation-binding",
++  "physical-operational-state",
+   "telemetry-truth",
++  "installed-capability-truth",
+   "alert-lifecycle",
+   "maintenance-truth",
+   "chief-decision-authority",
+@@ -18,12 +20,12 @@ export const RepositoryArchitectureSchema = z
+     repositoryId: z.literal("etr-3d-modeler-control-lab"),
+     repositoryKind: z.literal("control-lab"),
+     purpose: z.object({
+-      capability: z.literal("semantic-equipment-model-generation"),
++      capability: z.literal("semantic-spatial-model-generation"),
+       statement: z.string().min(1),
+     }),
+     architecture: z.object({
+-      realm: z.literal("equipment-modeling"),
+-      faculty: z.literal("spatial-modeling"),
++      realm: z.literal("spatial-modeling"),
++      faculty: z.literal("spatial-representation"),
+       maturity: z.literal("experimental"),
+     }),
+     boundaries: z
+@@ -44,7 +46,7 @@ export const RepositoryArchitectureSchema = z
+         }
+       }),
+     subjects: z
+-      .array(z.object({ subjectKind: z.literal("equipment-model") }))
++      .array(z.object({ subjectKind: z.literal("spatial-model") }))
+       .min(1),
+     firstCustomer: z.literal("Detroit Diesel 8V92TA Equipment Explorer"),
+     integrations: z.object({
+@@ -60,14 +62,16 @@ export const RepositoryArchitectureSchema = z
+   })
+   .superRefine((repository, context) => {
+     const requiredOwnedBoundaries: BoundaryIdentifier[] = [
+-      "equipment-model-generation",
+-      "equipment-model-semantic-contracts",
+-      "equipment-model-validation",
+-      "equipment-model-inspection",
++      "spatial-model-generation",
++      "spatial-model-semantic-contracts",
++      "spatial-model-validation",
++      "spatial-model-inspection",
++      "spatial-representation-binding",
+     ]
+     const requiredExcludedBoundaries: BoundaryIdentifier[] = [
+-      "operational-equipment-state",
++      "physical-operational-state",
+       "telemetry-truth",
++      "installed-capability-truth",
+       "alert-lifecycle",
+       "maintenance-truth",
+       "chief-decision-authority",
+diff --git a/pnpm-lock.yaml b/pnpm-lock.yaml
+index f8f4bca..c8b9806 100644
+--- a/pnpm-lock.yaml
++++ b/pnpm-lock.yaml
+@@ -69,6 +69,9 @@ importers:
+ 
+   apps/model-api:
+     dependencies:
++      '@etr/equipment-model-contracts':
++        specifier: workspace:*
++        version: link:../../packages/equipment-model-contracts
+       '@etr/model-validation':
+         specifier: workspace:*
+         version: link:../../packages/model-validation
+diff --git a/scripts/_modeler-runtime.sh b/scripts/_modeler-runtime.sh
+index f545de8..adf72ae 100644
+--- a/scripts/_modeler-runtime.sh
++++ b/scripts/_modeler-runtime.sh
+@@ -111,7 +111,7 @@ import net from "node:net"
+ 
+ const listeners = [
+   [process.env.MODEL_API_HOST, Number(process.env.MODEL_API_PORT), "Model API"],
+-  [process.env.MODEL_VIEWER_HOST, Number(process.env.MODEL_VIEWER_PORT), "Equipment Explorer"],
++  [process.env.MODEL_VIEWER_HOST, Number(process.env.MODEL_VIEWER_PORT), "Spatial Model Explorer"],
+ ]
+ 
+ await Promise.all(listeners.map(([host, port, label]) => new Promise((resolve, reject) => {
+@@ -122,6 +122,109 @@ await Promise.all(listeners.map(([host, port, label]) => new Promise((resolve, r
+ NODE
+ }
+ 
++reclaim_modeler_ports() {
++  MODEL_API_PORT="$MODEL_API_PORT" \
++  MODEL_VIEWER_PORT="$MODEL_VIEWER_PORT" \
++  node --input-type=module <<'NODE'
++import { execFileSync } from "node:child_process"
++
++const listeners = [
++  [Number(process.env.MODEL_API_PORT), "Model API"],
++  [Number(process.env.MODEL_VIEWER_PORT), "Spatial Model Explorer"],
++]
++
++function listenerPids(port) {
++  if (process.platform === "win32") {
++    const output = execFileSync("netstat", ["-ano", "-p", "tcp"], {
++      encoding: "utf8",
++    })
++    return [...new Set(
++      output
++        .split(/\r?\n/)
++        .flatMap((line) => {
++          const match = line.match(
++            /^\s*TCP\s+\S+:(\d+)\s+\S+\s+LISTENING\s+(\d+)\s*$/i,
++          )
++          return match?.[1] === String(port) ? [match[2]] : []
++        }),
++    )]
++  }
++
++  try {
++    return execFileSync("lsof", ["-tiTCP:" + port, "-sTCP:LISTEN"], {
++      encoding: "utf8",
++    })
++      .trim()
++      .split(/\s+/)
++      .filter(Boolean)
++  } catch (error) {
++    if (error.status === 1) {
++      return []
++    }
++    throw error
++  }
++}
++
++function processDescription(pid) {
++  if (process.platform === "win32") {
++    try {
++      const commandLine = execFileSync(
++        "powershell.exe",
++        [
++          "-NoProfile",
++          "-Command",
++          `$process = Get-CimInstance Win32_Process -Filter 'ProcessId = ${pid}'; if ($null -ne $process) { \"$($process.Name) $($process.CommandLine)\" }`,
++        ],
++        { encoding: "utf8" },
++      )
++        .replace(/\s+/g, " ")
++        .trim()
++      if (commandLine) {
++        return commandLine
++      }
++    } catch {
++    }
++
++    try {
++      return execFileSync("tasklist", ["/FI", `PID eq ${pid}`, "/FO", "CSV", "/NH"], {
++        encoding: "utf8",
++      })
++        .trim()
++        .replace(/^"([^"]+)".*$/, "$1")
++    } catch {
++      return "unknown process"
++    }
++  }
++
++  try {
++    return execFileSync("ps", ["-p", pid, "-o", "command="], {
++      encoding: "utf8",
++    })
++      .replace(/\s+/g, " ")
++      .trim()
++  } catch {
++    return "unknown process"
++  }
++}
++
++for (const [port, label] of listeners) {
++  for (const pid of listenerPids(port)) {
++    const owner = processDescription(pid)
++    if (process.platform === "win32") {
++      execFileSync("taskkill", ["/PID", pid, "/T", "/F"], {
++        stdio: "ignore",
++      })
++    } else {
++      process.kill(Number(pid), "SIGTERM")
++    }
++    console.log(
++      `[modeler-local] Reclaimed ${label} port ${port} by stopping PID ${pid}: ${owner}`,
++    )
++  }
++}
++NODE
++}
++
+ print_modeler_lan_urls() {
+   MODEL_VIEWER_PORT="$MODEL_VIEWER_PORT" node --input-type=module <<'NODE'
+ import os from "node:os"
+diff --git a/scripts/generate-hatteras-fixture.mjs b/scripts/generate-hatteras-fixture.mjs
+new file mode 100644
+index 0000000..576deff
+--- /dev/null
++++ b/scripts/generate-hatteras-fixture.mjs
+@@ -0,0 +1,343 @@
++import { createHash } from "node:crypto"
++import { mkdir, writeFile } from "node:fs/promises"
++import { dirname, resolve } from "node:path"
++
++const fixtureDirectory = resolve("fixtures/spatial-models")
++const artifactPath = resolve(fixtureDirectory, "hatteras-63-motor-yacht.glb")
++const manifestPath = resolve(
++  fixtureDirectory,
++  "hatteras-63-motor-yacht.manifest.json",
++)
++const encoder = new TextEncoder()
++
++const positions = new Float32Array([
++  -0.5, -0.5, -0.5, 0.5, -0.5, -0.5, 0.5, 0.5, -0.5, -0.5, 0.5, -0.5, -0.5,
++  -0.5, 0.5, 0.5, -0.5, 0.5, 0.5, 0.5, 0.5, -0.5, 0.5, 0.5,
++])
++const indices = new Uint16Array([
++  0, 1, 2, 0, 2, 3, 4, 6, 5, 4, 7, 6, 0, 4, 5, 0, 5, 1, 1, 5, 6, 1, 6, 2, 2, 6,
++  7, 2, 7, 3, 4, 0, 3, 4, 3, 7,
++])
++const binary = Buffer.concat([
++  Buffer.from(positions.buffer),
++  Buffer.from(indices.buffer),
++])
++
++const nodes = [
++  {
++    name: "HatterasHull",
++    mesh: 0,
++    scale: [4.8, 0.8, 1.7],
++    translation: [0, 0.2, 0],
++  },
++  {
++    name: "HatterasMainDeck",
++    mesh: 0,
++    scale: [4.2, 0.18, 1.55],
++    translation: [0, 1, 0],
++  },
++  {
++    name: "HatterasFlybridgeDeck",
++    mesh: 0,
++    scale: [1.5, 0.15, 1.2],
++    translation: [0, 2.75, 0.25],
++  },
++  {
++    name: "HatterasBow",
++    mesh: 0,
++    scale: [2.8, 0.45, 1.35],
++    translation: [0, 0.7, 3.25],
++  },
++  {
++    name: "HatterasSalon",
++    mesh: 0,
++    scale: [2.3, 1, 1.25],
++    translation: [0, 1.7, -0.3],
++  },
++  {
++    name: "HatterasFlybridge",
++    mesh: 0,
++    scale: [1.2, 0.38, 0.9],
++    translation: [0, 3.1, 0.2],
++  },
++  {
++    name: "HatterasEngineRoom",
++    mesh: 0,
++    scale: [1.2, 0.4, 0.8],
++    translation: [0, 0.85, -1.7],
++  },
++  {
++    name: "HatterasCockpit",
++    mesh: 0,
++    scale: [1.5, 0.25, 1.4],
++    translation: [0, 1, -3.5],
++  },
++]
++const document = {
++  asset: { version: "2.0", generator: "phase-2-hatteras-fixture-generator" },
++  scene: 0,
++  scenes: [{ nodes: nodes.map((_, index) => index) }],
++  nodes,
++  meshes: [
++    {
++      primitives: [
++        {
++          attributes: { POSITION: 0 },
++          indices: 1,
++          material: 0,
++        },
++      ],
++    },
++  ],
++  materials: [
++    {
++      pbrMetallicRoughness: {
++        baseColorFactor: [0.26, 0.57, 0.65, 1],
++        metallicFactor: 0.15,
++        roughnessFactor: 0.45,
++      },
++    },
++  ],
++  buffers: [{ byteLength: binary.length }],
++  bufferViews: [
++    {
++      buffer: 0,
++      byteOffset: 0,
++      byteLength: positions.byteLength,
++      target: 34962,
++    },
++    {
++      buffer: 0,
++      byteOffset: positions.byteLength,
++      byteLength: indices.byteLength,
++      target: 34963,
++    },
++  ],
++  accessors: [
++    {
++      bufferView: 0,
++      componentType: 5126,
++      count: 8,
++      type: "VEC3",
++      min: [-0.5, -0.5, -0.5],
++      max: [0.5, 0.5, 0.5],
++    },
++    {
++      bufferView: 1,
++      componentType: 5123,
++      count: indices.length,
++      type: "SCALAR",
++    },
++  ],
++}
++const json = Buffer.from(encoder.encode(JSON.stringify(document)))
++const paddedJson = Buffer.concat([
++  json,
++  Buffer.alloc((4 - (json.length % 4)) % 4, 0x20),
++])
++const paddedBinary = Buffer.concat([
++  binary,
++  Buffer.alloc((4 - (binary.length % 4)) % 4),
++])
++const totalLength = 12 + 8 + paddedJson.length + 8 + paddedBinary.length
++const header = Buffer.alloc(12)
++header.writeUInt32LE(0x46546c67, 0)
++header.writeUInt32LE(2, 4)
++header.writeUInt32LE(totalLength, 8)
++const jsonHeader = Buffer.alloc(8)
++jsonHeader.writeUInt32LE(paddedJson.length, 0)
++jsonHeader.writeUInt32LE(0x4e4f534a, 4)
++const binaryHeader = Buffer.alloc(8)
++binaryHeader.writeUInt32LE(paddedBinary.length, 0)
++binaryHeader.writeUInt32LE(0x004e4942, 4)
++const artifact = Buffer.concat([
++  header,
++  jsonHeader,
++  paddedJson,
++  binaryHeader,
++  paddedBinary,
++])
++
++const transform = (position) => ({ position })
++const region = (regionId, displayName, position, dimensions) => ({
++  regionId,
++  displayName,
++  regionKind: "placement-volume",
++  transform: transform(position),
++  dimensions,
++})
++const anchor = (anchorId, displayName, position, placementRegionId) => ({
++  anchorId,
++  displayName,
++  transform: transform(position),
++  placementRegionId,
++})
++const area = (
++  semanticId,
++  displayName,
++  glbNodeName,
++  parentSemanticId,
++  placement,
++) => ({
++  semanticId,
++  semanticKind: "area",
++  semanticRole: "vessel-area",
++  displayName,
++  parentSemanticId,
++  representation: { glbNodes: [glbNodeName] },
++  interactionCapabilities: ["selectable", "highlightable"],
++  spatial: placement,
++})
++
++const manifest = {
++  modelId: "hatteras-63-motor-yacht-prototype",
++  modelKind: "hatteras-63-motor-yacht",
++  modelProfile: "vessel",
++  modelVersion: "0.1.0",
++  subject: {
++    subjectId: "vessel-model:hatteras-63-motor-yacht-prototype",
++    subjectKind: "vessel-model",
++  },
++  artifact: {
++    artifactId: "hatteras-63-motor-yacht-prototype-fixture",
++    artifactVersion: "0.1.0",
++    fileName: "hatteras-63-motor-yacht.glb",
++    contentFingerprint: `sha256:${createHash("sha256").update(artifact).digest("hex")}`,
++  },
++  generator: {
++    name: "phase-2-hatteras-fixture-generator",
++    version: "0.1.0",
++    sourceRevision: "phase-2-slice-1",
++  },
++  sourceReferences: [],
++  coordinateFrame: "right-handed-y-up",
++  placementCoordinateFrame: "model",
++  units: "meters",
++  createdAt: "2026-09-28T00:00:00.000Z",
++  generatedAt: "2026-09-28T00:00:00.000Z",
++  exportedAt: "2026-09-28T00:00:00.000Z",
++  validatedAt: "2026-09-28T00:00:00.000Z",
++  semanticNodes: [
++    {
++      semanticId: "vessel.hatteras-63",
++      semanticKind: "vessel",
++      semanticRole: "motor-yacht",
++      displayName: "Hatteras 63 Motor Yacht",
++      representation: { glbNodes: ["HatterasHull"] },
++      interactionCapabilities: ["selectable"],
++    },
++    {
++      semanticId: "vessel.level.main-deck",
++      semanticKind: "level",
++      semanticRole: "main-deck",
++      displayName: "Main Deck",
++      parentSemanticId: "vessel.hatteras-63",
++      representation: { glbNodes: ["HatterasMainDeck"] },
++      interactionCapabilities: ["selectable"],
++    },
++    {
++      semanticId: "vessel.level.flybridge",
++      semanticKind: "level",
++      semanticRole: "flybridge-deck",
++      displayName: "Flybridge Deck",
++      parentSemanticId: "vessel.hatteras-63",
++      representation: { glbNodes: ["HatterasFlybridgeDeck"] },
++      interactionCapabilities: ["selectable"],
++    },
++    area("vessel.area.bow", "Bow", "HatterasBow", "vessel.level.main-deck", {
++      placementRegions: [
++        region("deck", "Bow deck", [0, 1.15, 3.25], [2.5, 0.2, 1.2]),
++      ],
++      placementAnchors: [
++        anchor("deck-center", "Deck center", [0, 1.3, 3.25], "deck"),
++      ],
++    }),
++    area(
++      "vessel.area.flybridge",
++      "Flybridge",
++      "HatterasFlybridge",
++      "vessel.level.flybridge",
++      {
++        placementRegions: [
++          region(
++            "overhead",
++            "Flybridge overhead",
++            [0, 3.55, 0.2],
++            [2.2, 0.25, 1.6],
++          ),
++        ],
++        placementAnchors: [
++          anchor(
++            "overhead-port",
++            "Overhead port",
++            [-0.65, 3.7, 0.2],
++            "overhead",
++          ),
++          anchor(
++            "overhead-center",
++            "Overhead center",
++            [0, 3.7, 0.2],
++            "overhead",
++          ),
++          anchor("helm", "Helm", [0, 3.45, 0.65], "overhead"),
++        ],
++      },
++    ),
++    area(
++      "vessel.area.salon",
++      "Salon",
++      "HatterasSalon",
++      "vessel.level.main-deck",
++      {
++        placementRegions: [
++          region("ceiling", "Salon ceiling", [0, 2.65, -0.3], [3.8, 0.2, 2]),
++        ],
++        placementAnchors: [
++          anchor("ceiling-center", "Ceiling center", [0, 2.8, -0.3], "ceiling"),
++        ],
++      },
++    ),
++    area(
++      "vessel.area.engine-room",
++      "Engine Room",
++      "HatterasEngineRoom",
++      "vessel.level.main-deck",
++      {
++        placementRegions: [
++          region(
++            "bilge",
++            "Engine room bilge",
++            [0, 0.55, -1.7],
++            [1.8, 0.2, 1.2],
++          ),
++        ],
++        placementAnchors: [
++          anchor("bilge-center", "Bilge center", [0, 0.65, -1.7], "bilge"),
++        ],
++      },
++    ),
++    area(
++      "vessel.area.cockpit",
++      "Cockpit",
++      "HatterasCockpit",
++      "vessel.level.main-deck",
++      {
++        placementRegions: [
++          region("aft-deck", "Aft deck", [0, 1.2, -3.5], [2.5, 0.2, 2]),
++        ],
++        placementAnchors: [
++          anchor("aft-center", "Aft center", [0, 1.35, -3.5], "aft-deck"),
++        ],
++      },
++    ),
++  ],
++  modelReferences: [],
++}
++
++await mkdir(fixtureDirectory, { recursive: true })
++await Promise.all([
++  writeFile(artifactPath, artifact),
++  writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`),
++])
++console.log(`Generated ${artifactPath}`)
++console.log(`Generated ${manifestPath}`)
+diff --git a/scripts/run-local.sh b/scripts/run-local.sh
+index 2d307c1..b649d0d 100644
+--- a/scripts/run-local.sh
++++ b/scripts/run-local.sh
+@@ -17,6 +17,15 @@ if [[ ! -d "$ROOT/node_modules" ]]; then
+   exit 1
+ fi
+ validate_modeler_configuration
++echo "[modeler-local] Local development only: reclaiming configured ports stops any listener on them; do not use this behavior for production startup."
++reclaim_modeler_ports
++
++for _ in {1..30}; do
++  if ensure_modeler_ports_available >/dev/null 2>&1; then
++    break
++  fi
++  sleep 1
++done
+ ensure_modeler_ports_available
+ 
+ cleanup() {
+@@ -27,6 +36,7 @@ trap cleanup EXIT INT TERM
+ 
+ echo "[modeler-local] API: http://${MODEL_API_HOST}:${MODEL_API_PORT}"
+ echo "[modeler-local] Viewer: http://localhost:${MODEL_VIEWER_PORT}"
++echo "[modeler-local] Launch URL: http://localhost:${MODEL_VIEWER_PORT}"
+ echo "[modeler-local] API upstream: ${MODEL_API_UPSTREAM}"
+ 
+ pnpm --filter @etr/model-api dev &
+@@ -37,7 +47,7 @@ viewer_pid=$!
+ for _ in {1..30}; do
+   if curl -fsS "http://${MODEL_API_HOST}:${MODEL_API_PORT}/health" >/dev/null && curl -fsS "http://127.0.0.1:${MODEL_VIEWER_PORT}" >/dev/null; then
+     echo "[modeler-local] Ready"
+-    echo "[modeler-local] Open: http://localhost:${MODEL_VIEWER_PORT}"
++    echo "[modeler-local] Launch URL: http://localhost:${MODEL_VIEWER_PORT}"
+     print_modeler_lan_urls
+     echo "[modeler-local] Health: http://${MODEL_API_HOST}:${MODEL_API_PORT}/health"
+     wait -n "$api_pid" "$viewer_pid"
+diff --git a/tests/e2e/equipment-viewer.spec.ts b/tests/e2e/equipment-viewer.spec.ts
+index 7180008..bdafdc9 100644
+--- a/tests/e2e/equipment-viewer.spec.ts
++++ b/tests/e2e/equipment-viewer.spec.ts
+@@ -1,6 +1,6 @@
+ import { expect, test } from "@playwright/test"
+ 
+-test("renders and explores the validated equipment-model fixture", async ({
++test("renders the Hatteras vessel and places runtime capabilities", async ({
+   page,
+ }) => {
+   const consoleErrors: string[] = []
+@@ -10,9 +10,9 @@ test("renders and explores the validated equipment-model fixture", async ({
+     }
+   })
+ 
+-  await page.goto("/")
++  await page.goto("/", { waitUntil: "domcontentloaded" })
+   await expect(
+-    page.getByRole("heading", { name: "Detroit Diesel 8V92TA" }),
++    page.getByRole("heading", { name: "Hatteras 63 Motor Yacht" }),
+   ).toBeVisible()
+ 
+   const canvas = page.locator("canvas")
+@@ -46,12 +46,12 @@ test("renders and explores the validated equipment-model fixture", async ({
+   }, screenshot.toString("base64"))
+   expect(hasModelPixel).toBe(true)
+ 
+-  await page.getByRole("button", { name: "Piston L1" }).click()
+-  await expect(page.getByText("piston.l1")).toBeVisible()
+-  await page.getByRole("button", { name: "Isolate" }).click()
+-  await page.getByRole("button", { name: "Reset" }).click()
+-  await expect(
+-    page.getByText("Select a semantic component in the canvas or list."),
+-  ).toBeVisible()
++  await page.getByRole("button", { name: "Flybridge" }).click()
++  await page.getByRole("button", { name: "Add capability" }).click()
++  await expect(page.getByText("Thermal Camera · Flybridge")).toBeVisible()
++  await page.getByRole("button", { name: "Water Sensor" }).click()
++  await page.getByRole("button", { name: "Engine Room" }).click()
++  await page.getByRole("button", { name: "Add capability" }).click()
++  await expect(page.getByText("Water Sensor · Engine Room")).toBeVisible()
+   expect(consoleErrors).toEqual([])
+ })

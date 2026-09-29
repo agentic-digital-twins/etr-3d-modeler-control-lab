@@ -1,12 +1,14 @@
 import { z } from "zod"
 
 const BoundaryIdentifierSchema = z.enum([
-  "equipment-model-generation",
-  "equipment-model-semantic-contracts",
-  "equipment-model-validation",
-  "equipment-model-inspection",
-  "operational-equipment-state",
+  "spatial-model-generation",
+  "spatial-model-semantic-contracts",
+  "spatial-model-validation",
+  "spatial-model-inspection",
+  "spatial-representation-binding",
+  "physical-operational-state",
   "telemetry-truth",
+  "installed-capability-truth",
   "alert-lifecycle",
   "maintenance-truth",
   "chief-decision-authority",
@@ -18,12 +20,12 @@ export const RepositoryArchitectureSchema = z
     repositoryId: z.literal("etr-3d-modeler-control-lab"),
     repositoryKind: z.literal("control-lab"),
     purpose: z.object({
-      capability: z.literal("semantic-equipment-model-generation"),
+      capability: z.literal("semantic-spatial-model-generation"),
       statement: z.string().min(1),
     }),
     architecture: z.object({
-      realm: z.literal("equipment-modeling"),
-      faculty: z.literal("spatial-modeling"),
+      realm: z.literal("spatial-modeling"),
+      faculty: z.literal("spatial-representation"),
       maturity: z.literal("experimental"),
     }),
     boundaries: z
@@ -44,7 +46,7 @@ export const RepositoryArchitectureSchema = z
         }
       }),
     subjects: z
-      .array(z.object({ subjectKind: z.literal("equipment-model") }))
+      .array(z.object({ subjectKind: z.literal("spatial-model") }))
       .min(1),
     firstCustomer: z.literal("Detroit Diesel 8V92TA Equipment Explorer"),
     integrations: z.object({
@@ -60,14 +62,16 @@ export const RepositoryArchitectureSchema = z
   })
   .superRefine((repository, context) => {
     const requiredOwnedBoundaries: BoundaryIdentifier[] = [
-      "equipment-model-generation",
-      "equipment-model-semantic-contracts",
-      "equipment-model-validation",
-      "equipment-model-inspection",
+      "spatial-model-generation",
+      "spatial-model-semantic-contracts",
+      "spatial-model-validation",
+      "spatial-model-inspection",
+      "spatial-representation-binding",
     ]
     const requiredExcludedBoundaries: BoundaryIdentifier[] = [
-      "operational-equipment-state",
+      "physical-operational-state",
       "telemetry-truth",
+      "installed-capability-truth",
       "alert-lifecycle",
       "maintenance-truth",
       "chief-decision-authority",

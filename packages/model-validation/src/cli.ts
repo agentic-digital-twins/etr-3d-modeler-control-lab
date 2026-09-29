@@ -14,13 +14,13 @@ if (!manifestPath || !artifactPath) {
   )
 
   if (!report.valid) {
-    console.error("Equipment model contract: invalid")
+    console.error("Spatial model contract: invalid")
     console.error(report.errors.join("\n"))
     process.exitCode = 1
   } else {
-    console.log("Equipment model contract: valid")
+    console.log("Spatial model contract: valid")
     console.log(`Model kind: ${report.manifest.modelKind}`)
-    console.log(`Components: ${report.manifest.components.length}`)
+    console.log(`Semantic nodes: ${report.manifest.semanticNodes.length}`)
     console.log("READY")
   }
 }
