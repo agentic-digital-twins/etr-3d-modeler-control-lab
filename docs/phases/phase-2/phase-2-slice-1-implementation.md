@@ -26,10 +26,13 @@ The vessel manifest owns reusable spatial truth only. Capability instances, sele
 
 Use `modelReferences[]` only when a vessel needs to declare an independently versioned attached model. Nested model loading is deferred; Slice 1 renders generic Three.js capability primitives directly from configuration data.
 
+All placement-region and placement-anchor transforms are expressed in model coordinate space. `placementCoordinateFrame` is therefore fixed to `"model"` in this contract version. It is distinct from `coordinateFrame`, which declares the model's axis convention. Local, parent-semantic-node, representation-node, and placement-region frames are deferred until a future contract version introduces them explicitly.
+
 ## Deferred contract decisions
 
 - Keep `modelProfile` as an open string in Slice 0. Slice 1 will define vessel-specific invariants only after the first Hatteras model establishes the required level and area semantics.
 - Keep `modelReferences[]` unpinned in Slice 0 because composition is declarative only. Before nested model loading is implemented, require a deterministic referenced model version or resolved artifact identity.
+- Slice 1 selects the first declared anchor in an area as its deterministic placement proof. The next placement-semantic problem is a resolver from capability requirements to compatible placement regions/anchors, followed by a selected or default anchor.
 
 ---
 
