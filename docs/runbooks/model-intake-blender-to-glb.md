@@ -129,7 +129,24 @@ If any check fails, retain the failed candidate for diagnosis only, correct the
 source or export settings, and export a new versioned candidate. Do not
 silently replace a candidate artifact.
 
-## 5. Introduce and validate the candidate
+## 5. Record inspection evidence
+
+Create `intake-inspection.md` beside the candidate manifest. Record facts
+that can be read from the GLB separately from facts that require visual
+inspection:
+
+- Exporter name and version, GLB version, SHA-256 fingerprint, node names,
+  mesh names, materials, triangle count, texture/image count, and raw bounds.
+- Confirmed source units, bow-forward direction, starboard direction, origin
+  alignment, rendered normals, material appearance, and browser framing.
+
+Label unconfirmed values explicitly. Do not represent raw GLB bounds as
+real-world dimensions until the source units and conversion are confirmed.
+Set manifest lifecycle timestamps from the actual creation, export, receipt,
+and validation events; do not use the manifest-generation time as a substitute
+for unknown authoring or export times.
+
+## 6. Introduce and validate the candidate
 
 The current semantic manifest is the source of truth for vessel hierarchy,
 areas, placement anchors, and behavior. Map the candidate only to the
@@ -160,7 +177,40 @@ not decide whether the hull looks correct, has appropriate polygon density, or
 matches the vessel's real-world dimensions; those remain explicit intake
 acceptance checks.
 
-## 6. Accept or promote
+## 7. Preserve normalized fixture parity
+
+When normalizing an existing generated fixture into `models/`, retain its
+fixture behavior and add a regression check that:
+
+1. Regenerates the fixture.
+2. Verifies the generated fixture artifact and manifest against approved
+   baselines.
+3. Confirms the normalized source artifact is byte-identical to the fixture.
+4. Confirms the normalized manifest preserves semantic nodes, GLB bindings,
+   placement regions, and anchors, allowing only documented source-identity
+   metadata differences.
+
+For the Hatteras spatial model, run:
+
+```powershell
+pnpm run check:hatteras-fixture
+```
+
+Do not change the fixture's consumer-facing identity as part of normalization.
+
+## 8. Publish to an external visual consumer
+
+An external application such as Boat Builder should receive only the approved,
+versioned GLB and minimal display metadata it needs to render the asset. It
+must not need to consume the Modeler Lab spatial manifest merely to display a
+hull.
+
+Record the receiving repository, public asset directory, versioning rule, and
+deployment owner. In the first iteration, publishing a validated GLB to the
+consumer's public asset directory is sufficient; defer a distribution contract
+until multiple consumers require one.
+
+## 9. Accept or promote
 
 Load the candidate in the viewer beside the existing Hatteras spatial model
 and verify camera framing, material appearance, model switching, selection,
@@ -168,11 +218,9 @@ isolation, and capability placement. Accept the candidate only when these
 behaviors and all preceding inspection checks pass.
 
 On acceptance, update the model's manifest and any catalog wiring needed to
-serve the approved GLB, then run the smallest relevant validation command:
-
-```powershell
-pnpm validate:model
-```
+serve the approved GLB. Run the exact manifest/GLB validation command from
+section 6, the applicable fixture-parity check from section 7, and the
+consumer's focused rendering and vessel-switching tests.
 
 Keep the original Blender source in `sources/` and the approved GLB in
 `geometry/`. Never move either to `fixtures/` merely because it was used by a
