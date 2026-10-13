@@ -34,3 +34,13 @@ For the reusable Repository Genesis creation procedure, see [README-new-reposito
 ## Artifact Boundary
 
 The viewer consumes a validated GLB and `EquipmentModelManifest` over the local API. It does not execute Blender or procedural-generation tooling. See [repository-charter.md](docs/architecture/repository-charter.md) and [model-contract-boundaries.md](docs/architecture/model-contract-boundaries.md).
+
+## Standard closeout
+
+For a completed change:
+
+1. Run the smallest relevant tests and report their commands and results.
+2. Review the working-tree scope and targeted diff, then commit only the intended files with the required co-author trailer.
+3. Push a dedicated branch to `origin`, verify its remote SHA, and never push to `main` without explicit approval.
+4. Generate a binary-capable patch in ignored `pr-patches/` relative to `origin/main`, prefix its filename with the first 12 characters of its SHA-256, and validate it against its base.
+5. Report the patch link, full SHA-256, size, line count, PR title and description, completed work, tests, and final repository state.
