@@ -456,6 +456,7 @@ const manifest = {
 const sourceManifest = {
   ...manifest,
   modelId: "hatteras-63-motor-yacht",
+  modelKind: "vessel",
   subject: {
     ...manifest.subject,
     subjectId: "vessel-model:hatteras-63-motor-yacht",

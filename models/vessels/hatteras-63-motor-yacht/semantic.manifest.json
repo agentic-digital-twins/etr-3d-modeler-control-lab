@@ -1,6 +1,6 @@
 {
   "modelId": "hatteras-63-motor-yacht",
-  "modelKind": "hatteras-63-motor-yacht",
+  "modelKind": "vessel",
   "modelProfile": "vessel",
   "modelVersion": "0.1.0",
   "subject": {
