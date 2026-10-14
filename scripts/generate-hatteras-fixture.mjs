@@ -1,8 +1,9 @@
 import { createHash } from "node:crypto"
-import { mkdir, writeFile } from "node:fs/promises"
+import { copyFile, mkdir, writeFile } from "node:fs/promises"
 import { dirname, resolve } from "node:path"
 
 const fixtureDirectory = resolve("fixtures/spatial-models")
+const sourceDirectory = resolve("models/vessels/hatteras-63-motor-yacht")
 const artifactPath = resolve(fixtureDirectory, "hatteras-63-motor-yacht.glb")
 const manifestPath = resolve(
   fixtureDirectory,
@@ -452,10 +453,46 @@ const manifest = {
   modelReferences: [],
 }
 
-await mkdir(fixtureDirectory, { recursive: true })
+const sourceManifest = {
+  ...manifest,
+  modelId: "hatteras-63-motor-yacht",
+  modelKind: "vessel",
+  subject: {
+    ...manifest.subject,
+    subjectId: "vessel-model:hatteras-63-motor-yacht",
+  },
+  artifact: {
+    ...manifest.artifact,
+    artifactId: "hatteras-63-motor-yacht-fixture",
+  },
+}
+
+await Promise.all([
+  mkdir(fixtureDirectory, { recursive: true }),
+  mkdir(resolve(sourceDirectory, "geometry"), { recursive: true }),
+  mkdir(resolve(sourceDirectory, "sources"), { recursive: true }),
+])
 await Promise.all([
   writeFile(artifactPath, artifact),
   writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`),
+  writeFile(
+    resolve(sourceDirectory, "semantic.manifest.json"),
+    `${JSON.stringify(sourceManifest, null, 2)}\n`,
+  ),
+  writeFile(
+    resolve(sourceDirectory, "model.json"),
+    `${JSON.stringify(
+      {
+        modelId: sourceManifest.modelId,
+        modelKind: sourceManifest.modelKind,
+        sourceOfTruth: "semantic.manifest.json",
+      },
+      null,
+      2,
+    )}\n`,
+  ),
 ])
+await copyFile(artifactPath, resolve(sourceDirectory, "geometry/hatteras-63-motor-yacht.glb"))
 console.log(`Generated ${artifactPath}`)
 console.log(`Generated ${manifestPath}`)
+console.log(`Generated ${sourceDirectory}`)

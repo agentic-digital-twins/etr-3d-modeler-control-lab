@@ -1,0 +1,750 @@
+{
+  "modelId": "hatteras-63-motor-yacht",
+  "modelKind": "vessel",
+  "modelProfile": "vessel",
+  "modelVersion": "0.1.0",
+  "subject": {
+    "subjectId": "vessel-model:hatteras-63-motor-yacht",
+    "subjectKind": "vessel-model"
+  },
+  "artifact": {
+    "artifactId": "hatteras-63-motor-yacht-fixture",
+    "artifactVersion": "0.1.0",
+    "fileName": "hatteras-63-motor-yacht.glb",
+    "contentFingerprint": "sha256:870a5c3bff406555812fd33a6c1df7401e82c0d239f55a91c66382f58da9579c"
+  },
+  "generator": {
+    "name": "phase-2-hatteras-fixture-generator",
+    "version": "0.1.0",
+    "sourceRevision": "phase-2-slice-1"
+  },
+  "sourceReferences": [],
+  "coordinateFrame": "right-handed-y-up",
+  "placementCoordinateFrame": "model",
+  "units": "meters",
+  "createdAt": "2026-09-28T00:00:00.000Z",
+  "generatedAt": "2026-09-28T00:00:00.000Z",
+  "exportedAt": "2026-09-28T00:00:00.000Z",
+  "validatedAt": "2026-09-28T00:00:00.000Z",
+  "semanticNodes": [
+    {
+      "semanticId": "vessel.hatteras-63",
+      "semanticKind": "vessel",
+      "semanticRole": "motor-yacht",
+      "displayName": "Hatteras 63 Motor Yacht",
+      "representation": {
+        "glbNodes": [
+          "HatterasHull"
+        ]
+      },
+      "interactionCapabilities": [
+        "selectable"
+      ]
+    },
+    {
+      "semanticId": "vessel.level.machinery",
+      "semanticKind": "level",
+      "semanticRole": "machinery",
+      "displayName": "Machinery",
+      "parentSemanticId": "vessel.hatteras-63",
+      "representation": {
+        "glbNodes": [
+          "HatterasMachineryDeck"
+        ]
+      },
+      "interactionCapabilities": [
+        "selectable",
+        "highlightable",
+        "isolatable"
+      ]
+    },
+    {
+      "semanticId": "vessel.level.accommodation",
+      "semanticKind": "level",
+      "semanticRole": "accommodation",
+      "displayName": "Accommodation",
+      "parentSemanticId": "vessel.hatteras-63",
+      "representation": {
+        "glbNodes": [
+          "HatterasAccommodationDeck"
+        ]
+      },
+      "interactionCapabilities": [
+        "selectable",
+        "highlightable",
+        "isolatable"
+      ]
+    },
+    {
+      "semanticId": "vessel.level.main-deck",
+      "semanticKind": "level",
+      "semanticRole": "main-deck",
+      "displayName": "Main Deck",
+      "parentSemanticId": "vessel.hatteras-63",
+      "representation": {
+        "glbNodes": [
+          "HatterasMainDeck"
+        ]
+      },
+      "interactionCapabilities": [
+        "selectable",
+        "highlightable",
+        "isolatable"
+      ]
+    },
+    {
+      "semanticId": "vessel.level.flybridge",
+      "semanticKind": "level",
+      "semanticRole": "flybridge",
+      "displayName": "Flybridge",
+      "parentSemanticId": "vessel.hatteras-63",
+      "representation": {
+        "glbNodes": [
+          "HatterasFlybridgeDeck"
+        ]
+      },
+      "interactionCapabilities": [
+        "selectable",
+        "highlightable",
+        "isolatable"
+      ]
+    },
+    {
+      "semanticId": "vessel.area.engine-room",
+      "semanticKind": "area",
+      "semanticRole": "vessel-area",
+      "displayName": "Engine Room",
+      "parentSemanticId": "vessel.level.machinery",
+      "representation": {
+        "glbNodes": [
+          "HatterasEngineRoom"
+        ]
+      },
+      "interactionCapabilities": [
+        "selectable",
+        "highlightable"
+      ],
+      "spatial": {
+        "placementRegions": [
+          {
+            "regionId": "placement",
+            "displayName": "Engine Room placement",
+            "regionKind": "placement-volume",
+            "transform": {
+              "position": [
+                0,
+                0.9,
+                -1.8
+              ]
+            },
+            "dimensions": [
+              2.6,
+              0.3,
+              1.5
+            ]
+          }
+        ],
+        "placementAnchors": [
+          {
+            "anchorId": "default",
+            "displayName": "Engine Room default",
+            "transform": {
+              "position": [
+                0,
+                0.9,
+                -1.8
+              ]
+            },
+            "placementRegionId": "placement"
+          }
+        ]
+      }
+    },
+    {
+      "semanticId": "vessel.area.vip-stateroom",
+      "semanticKind": "area",
+      "semanticRole": "vessel-area",
+      "displayName": "VIP Stateroom",
+      "parentSemanticId": "vessel.level.accommodation",
+      "representation": {
+        "glbNodes": [
+          "HatterasVipStateroom"
+        ]
+      },
+      "interactionCapabilities": [
+        "selectable",
+        "highlightable"
+      ],
+      "spatial": {
+        "placementRegions": [
+          {
+            "regionId": "placement",
+            "displayName": "VIP Stateroom placement",
+            "regionKind": "placement-volume",
+            "transform": {
+              "position": [
+                0,
+                2.15,
+                2.55
+              ]
+            },
+            "dimensions": [
+              2.1,
+              0.3,
+              1.4
+            ]
+          }
+        ],
+        "placementAnchors": [
+          {
+            "anchorId": "default",
+            "displayName": "VIP Stateroom default",
+            "transform": {
+              "position": [
+                0,
+                2.15,
+                2.55
+              ]
+            },
+            "placementRegionId": "placement"
+          }
+        ]
+      }
+    },
+    {
+      "semanticId": "vessel.area.dinette",
+      "semanticKind": "area",
+      "semanticRole": "vessel-area",
+      "displayName": "Dinette",
+      "parentSemanticId": "vessel.level.accommodation",
+      "representation": {
+        "glbNodes": [
+          "HatterasDinette"
+        ]
+      },
+      "interactionCapabilities": [
+        "selectable",
+        "highlightable"
+      ],
+      "spatial": {
+        "placementRegions": [
+          {
+            "regionId": "placement",
+            "displayName": "Dinette placement",
+            "regionKind": "placement-volume",
+            "transform": {
+              "position": [
+                -1.45,
+                2.1,
+                0.65
+              ]
+            },
+            "dimensions": [
+              1.8,
+              0.3,
+              1.2
+            ]
+          }
+        ],
+        "placementAnchors": [
+          {
+            "anchorId": "default",
+            "displayName": "Dinette default",
+            "transform": {
+              "position": [
+                -1.45,
+                2.1,
+                0.65
+              ]
+            },
+            "placementRegionId": "placement"
+          }
+        ]
+      }
+    },
+    {
+      "semanticId": "vessel.area.galley",
+      "semanticKind": "area",
+      "semanticRole": "vessel-area",
+      "displayName": "Galley",
+      "parentSemanticId": "vessel.level.accommodation",
+      "representation": {
+        "glbNodes": [
+          "HatterasGalley"
+        ]
+      },
+      "interactionCapabilities": [
+        "selectable",
+        "highlightable"
+      ],
+      "spatial": {
+        "placementRegions": [
+          {
+            "regionId": "placement",
+            "displayName": "Galley placement",
+            "regionKind": "placement-volume",
+            "transform": {
+              "position": [
+                1.45,
+                2.1,
+                0.65
+              ]
+            },
+            "dimensions": [
+              1.8,
+              0.3,
+              1.2
+            ]
+          }
+        ],
+        "placementAnchors": [
+          {
+            "anchorId": "default",
+            "displayName": "Galley default",
+            "transform": {
+              "position": [
+                1.45,
+                2.1,
+                0.65
+              ]
+            },
+            "placementRegionId": "placement"
+          }
+        ]
+      }
+    },
+    {
+      "semanticId": "vessel.area.guest-stateroom",
+      "semanticKind": "area",
+      "semanticRole": "vessel-area",
+      "displayName": "Guest Stateroom",
+      "parentSemanticId": "vessel.level.accommodation",
+      "representation": {
+        "glbNodes": [
+          "HatterasGuestStateroom"
+        ]
+      },
+      "interactionCapabilities": [
+        "selectable",
+        "highlightable"
+      ],
+      "spatial": {
+        "placementRegions": [
+          {
+            "regionId": "placement",
+            "displayName": "Guest Stateroom placement",
+            "regionKind": "placement-volume",
+            "transform": {
+              "position": [
+                -1.35,
+                2.15,
+                -1.1
+              ]
+            },
+            "dimensions": [
+              1.8,
+              0.3,
+              1.3
+            ]
+          }
+        ],
+        "placementAnchors": [
+          {
+            "anchorId": "default",
+            "displayName": "Guest Stateroom default",
+            "transform": {
+              "position": [
+                -1.35,
+                2.15,
+                -1.1
+              ]
+            },
+            "placementRegionId": "placement"
+          }
+        ]
+      }
+    },
+    {
+      "semanticId": "vessel.area.master-stateroom",
+      "semanticKind": "area",
+      "semanticRole": "vessel-area",
+      "displayName": "Master Stateroom",
+      "parentSemanticId": "vessel.level.accommodation",
+      "representation": {
+        "glbNodes": [
+          "HatterasMasterStateroom"
+        ]
+      },
+      "interactionCapabilities": [
+        "selectable",
+        "highlightable"
+      ],
+      "spatial": {
+        "placementRegions": [
+          {
+            "regionId": "placement",
+            "displayName": "Master Stateroom placement",
+            "regionKind": "placement-volume",
+            "transform": {
+              "position": [
+                0.75,
+                2.25,
+                -1.75
+              ]
+            },
+            "dimensions": [
+              2.2,
+              0.3,
+              1.6
+            ]
+          }
+        ],
+        "placementAnchors": [
+          {
+            "anchorId": "default",
+            "displayName": "Master Stateroom default",
+            "transform": {
+              "position": [
+                0.75,
+                2.25,
+                -1.75
+              ]
+            },
+            "placementRegionId": "placement"
+          }
+        ]
+      }
+    },
+    {
+      "semanticId": "vessel.area.bow",
+      "semanticKind": "area",
+      "semanticRole": "vessel-area",
+      "displayName": "Bow / Foredeck",
+      "parentSemanticId": "vessel.level.main-deck",
+      "representation": {
+        "glbNodes": [
+          "HatterasBow"
+        ]
+      },
+      "interactionCapabilities": [
+        "selectable",
+        "highlightable"
+      ],
+      "spatial": {
+        "placementRegions": [
+          {
+            "regionId": "placement",
+            "displayName": "Bow / Foredeck placement",
+            "regionKind": "placement-volume",
+            "transform": {
+              "position": [
+                0,
+                3.3,
+                3.15
+              ]
+            },
+            "dimensions": [
+              3.8,
+              0.3,
+              2.2
+            ]
+          }
+        ],
+        "placementAnchors": [
+          {
+            "anchorId": "default",
+            "displayName": "Bow / Foredeck default",
+            "transform": {
+              "position": [
+                0,
+                3.3,
+                3.15
+              ]
+            },
+            "placementRegionId": "placement"
+          }
+        ]
+      }
+    },
+    {
+      "semanticId": "vessel.area.port-walk-deck",
+      "semanticKind": "area",
+      "semanticRole": "vessel-area",
+      "displayName": "Port Walk Deck",
+      "parentSemanticId": "vessel.level.main-deck",
+      "representation": {
+        "glbNodes": [
+          "HatterasPortWalkDeck"
+        ]
+      },
+      "interactionCapabilities": [
+        "selectable",
+        "highlightable"
+      ],
+      "spatial": {
+        "placementRegions": [
+          {
+            "regionId": "placement",
+            "displayName": "Port Walk Deck placement",
+            "regionKind": "placement-volume",
+            "transform": {
+              "position": [
+                -3.45,
+                3.1,
+                0.1
+              ]
+            },
+            "dimensions": [
+              0.7,
+              0.25,
+              5.6
+            ]
+          }
+        ],
+        "placementAnchors": [
+          {
+            "anchorId": "default",
+            "displayName": "Port Walk Deck default",
+            "transform": {
+              "position": [
+                -3.45,
+                3.1,
+                0.1
+              ]
+            },
+            "placementRegionId": "placement"
+          }
+        ]
+      }
+    },
+    {
+      "semanticId": "vessel.area.salon",
+      "semanticKind": "area",
+      "semanticRole": "vessel-area",
+      "displayName": "Salon",
+      "parentSemanticId": "vessel.level.main-deck",
+      "representation": {
+        "glbNodes": [
+          "HatterasSalon"
+        ]
+      },
+      "interactionCapabilities": [
+        "selectable",
+        "highlightable"
+      ],
+      "spatial": {
+        "placementRegions": [
+          {
+            "regionId": "placement",
+            "displayName": "Salon placement",
+            "regionKind": "placement-volume",
+            "transform": {
+              "position": [
+                0,
+                4.25,
+                -0.2
+              ]
+            },
+            "dimensions": [
+              3.8,
+              0.3,
+              2.2
+            ]
+          }
+        ],
+        "placementAnchors": [
+          {
+            "anchorId": "default",
+            "displayName": "Salon default",
+            "transform": {
+              "position": [
+                0,
+                4.25,
+                -0.2
+              ]
+            },
+            "placementRegionId": "placement"
+          }
+        ]
+      }
+    },
+    {
+      "semanticId": "vessel.area.starboard-walk-deck",
+      "semanticKind": "area",
+      "semanticRole": "vessel-area",
+      "displayName": "Starboard Walk Deck",
+      "parentSemanticId": "vessel.level.main-deck",
+      "representation": {
+        "glbNodes": [
+          "HatterasStarboardWalkDeck"
+        ]
+      },
+      "interactionCapabilities": [
+        "selectable",
+        "highlightable"
+      ],
+      "spatial": {
+        "placementRegions": [
+          {
+            "regionId": "placement",
+            "displayName": "Starboard Walk Deck placement",
+            "regionKind": "placement-volume",
+            "transform": {
+              "position": [
+                3.45,
+                3.1,
+                0.1
+              ]
+            },
+            "dimensions": [
+              0.7,
+              0.25,
+              5.6
+            ]
+          }
+        ],
+        "placementAnchors": [
+          {
+            "anchorId": "default",
+            "displayName": "Starboard Walk Deck default",
+            "transform": {
+              "position": [
+                3.45,
+                3.1,
+                0.1
+              ]
+            },
+            "placementRegionId": "placement"
+          }
+        ]
+      }
+    },
+    {
+      "semanticId": "vessel.area.cockpit",
+      "semanticKind": "area",
+      "semanticRole": "vessel-area",
+      "displayName": "Cockpit / Aft Deck",
+      "parentSemanticId": "vessel.level.main-deck",
+      "representation": {
+        "glbNodes": [
+          "HatterasCockpit"
+        ]
+      },
+      "interactionCapabilities": [
+        "selectable",
+        "highlightable"
+      ],
+      "spatial": {
+        "placementRegions": [
+          {
+            "regionId": "placement",
+            "displayName": "Cockpit / Aft Deck placement",
+            "regionKind": "placement-volume",
+            "transform": {
+              "position": [
+                0,
+                3.25,
+                -3.55
+              ]
+            },
+            "dimensions": [
+              3,
+              0.3,
+              2.2
+            ]
+          }
+        ],
+        "placementAnchors": [
+          {
+            "anchorId": "default",
+            "displayName": "Cockpit / Aft Deck default",
+            "transform": {
+              "position": [
+                0,
+                3.25,
+                -3.55
+              ]
+            },
+            "placementRegionId": "placement"
+          }
+        ]
+      }
+    },
+    {
+      "semanticId": "vessel.area.flybridge",
+      "semanticKind": "area",
+      "semanticRole": "vessel-area",
+      "displayName": "Flybridge",
+      "parentSemanticId": "vessel.level.flybridge",
+      "representation": {
+        "glbNodes": [
+          "HatterasFlybridge"
+        ]
+      },
+      "interactionCapabilities": [
+        "selectable",
+        "highlightable"
+      ],
+      "spatial": {
+        "placementRegions": [
+          {
+            "regionId": "overhead",
+            "displayName": "Flybridge overhead",
+            "regionKind": "placement-volume",
+            "transform": {
+              "position": [
+                0,
+                3.55,
+                0.2
+              ]
+            },
+            "dimensions": [
+              2.2,
+              0.25,
+              1.6
+            ]
+          }
+        ],
+        "placementAnchors": [
+          {
+            "anchorId": "overhead-port",
+            "displayName": "Overhead port",
+            "transform": {
+              "position": [
+                -0.65,
+                3.7,
+                0.2
+              ]
+            },
+            "placementRegionId": "overhead"
+          },
+          {
+            "anchorId": "overhead-center",
+            "displayName": "Overhead center",
+            "transform": {
+              "position": [
+                0,
+                3.7,
+                0.2
+              ]
+            },
+            "placementRegionId": "overhead"
+          },
+          {
+            "anchorId": "helm",
+            "displayName": "Helm",
+            "transform": {
+              "position": [
+                0,
+                3.45,
+                0.65
+              ]
+            },
+            "placementRegionId": "overhead"
+          }
+        ]
+      }
+    }
+  ],
+  "modelReferences": []
+}

@@ -1,0 +1,56 @@
+{
+  "modelId": "boat-builder-hatteras-63-motor-yacht",
+  "modelKind": "vessel-visual-component",
+  "modelProfile": "visual-component",
+  "modelVersion": "1.0.0",
+  "subject": {
+    "subjectId": "vessel-visual-component:boat-builder-hatteras-63-motor-yacht",
+    "subjectKind": "vessel-visual-component"
+  },
+  "artifact": {
+    "artifactId": "boat-builder-hatteras-63-motor-yacht-hull-v1",
+    "artifactVersion": "1.0.0",
+    "fileName": "hatteras-hull-v1.glb",
+    "contentFingerprint": "sha256:65d9ac86af513e1d4d48d09dff79048dbde626f948a7d9694d251f45e18c0505"
+  },
+  "generator": {
+    "name": "Blender glTF 2.0 exporter",
+    "version": "5.2.39",
+    "sourceRevision": "hatteras-hull-v1"
+  },
+  "sourceReferences": [
+    {
+      "referenceId": "hatteras-hull-v1-blend",
+      "kind": "reference-mesh",
+      "title": "Externally authored Hatteras hull source",
+      "locator": "sources/hatteras-hull-v1.blend",
+      "acquiredAt": "2026-10-13T15:45:20.049Z",
+      "role": "Authored visual hull source"
+    }
+  ],
+  "coordinateFrame": "right-handed-y-up",
+  "placementCoordinateFrame": "model",
+  "units": "unverified-blender-units",
+  "createdAt": "2026-10-13T15:45:20.049Z",
+  "generatedAt": "2026-10-13T15:45:20.049Z",
+  "exportedAt": "2026-10-13T15:45:20.049Z",
+  "validatedAt": "2026-10-13T15:45:20.049Z",
+  "semanticNodes": [
+    {
+      "semanticId": "vessel-component.hatteras-63.hull",
+      "semanticKind": "vessel-component",
+      "semanticRole": "hull",
+      "displayName": "Hatteras 63 Hull",
+      "representation": {
+        "glbNodes": [
+          "hull"
+        ]
+      },
+      "interactionCapabilities": [
+        "selectable",
+        "highlightable"
+      ]
+    }
+  ],
+  "modelReferences": []
+}
