@@ -10,7 +10,17 @@ const repositoryRoot = resolve(
   dirname(fileURLToPath(import.meta.url)),
   "../../..",
 )
-const fixtures = [
+const modelSources = [
+  {
+    manifestPath: resolve(
+      repositoryRoot,
+      "models/vessels/hatteras-63-motor-yacht-v2/semantic.manifest.json",
+    ),
+    artifactPath: resolve(
+      repositoryRoot,
+      "models/vessels/hatteras-63-motor-yacht-v2/geometry/hatteras-full-v2.glb",
+    ),
+  },
   {
     manifestPath: resolve(
       repositoryRoot,
@@ -70,7 +80,7 @@ type ValidatedModel = {
 
 export async function createApp(): Promise<Express> {
   const models: ValidatedModel[] = await Promise.all(
-    fixtures.map(async ({ manifestPath, artifactPath }) => {
+    modelSources.map(async ({ manifestPath, artifactPath }) => {
       const validation = await validateModel(manifestPath, artifactPath)
       if (!validation.valid) {
         throw new Error(

@@ -124,6 +124,10 @@ const manifest = {
 }
 const catalog = [
   {
+    modelId: "hatteras-63-motor-yacht-v2",
+    displayName: "Hatteras 63 Motor Yacht (Current)",
+  },
+  {
     modelId: "hatteras-63-motor-yacht-prototype",
     displayName: "Hatteras 63 Motor Yacht",
   },
@@ -159,6 +163,11 @@ describe("Spatial Model Explorer", () => {
     render(<App />)
 
     await screen.findByRole("heading", { name: "Hatteras 63 Motor Yacht" })
+    expect(
+      screen.getByRole("option", {
+        name: "Hatteras 63 Motor Yacht (Current)",
+      }),
+    ).toBeTruthy()
     expect(
       screen.getByRole("option", { name: "Offshore Center Console" }),
     ).toBeTruthy()
