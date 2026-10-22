@@ -4,9 +4,13 @@ import { describe, expect, it } from "vitest"
 import { createApp } from "./app.js"
 
 describe("model API", () => {
-  it("serves the validated fixture catalog and rejects unknown models", async () => {
+  it("serves the validated model catalog and rejects unknown models", async () => {
     const app = await createApp()
     const catalog = await request(app).get("/api/models").expect(200)
+    const currentHatteras = catalog.body.find(
+      (model: { modelId: string }) =>
+        model.modelId === "hatteras-63-motor-yacht-v2",
+    )
     const hatteras = catalog.body.find(
       (model: { modelId: string }) =>
         model.modelId === "hatteras-63-motor-yacht-prototype",
@@ -22,7 +26,12 @@ describe("model API", () => {
       (model: { modelId: string }) => model.modelId === "tri-deck-superyacht",
     )
 
-    expect(catalog.body).toHaveLength(5)
+    expect(catalog.body).toHaveLength(6)
+    expect(currentHatteras).toMatchObject({
+      displayName: "Hatteras 63 Motor Yacht (Current)",
+      modelKind: "vessel",
+      modelVersion: "2.0.0",
+    })
     expect(hatteras).toMatchObject({
       modelKind: "hatteras-63-motor-yacht",
       modelVersion: "0.1.0",
@@ -47,6 +56,12 @@ describe("model API", () => {
       .expect(200)
     await request(app)
       .get("/api/models/hatteras-63-motor-yacht-prototype/artifact")
+      .expect(200)
+    await request(app)
+      .get("/api/models/hatteras-63-motor-yacht-v2/manifest")
+      .expect(200)
+    await request(app)
+      .get("/api/models/hatteras-63-motor-yacht-v2/artifact")
       .expect(200)
     await request(app)
       .get("/api/models/offshore-center-console/manifest")

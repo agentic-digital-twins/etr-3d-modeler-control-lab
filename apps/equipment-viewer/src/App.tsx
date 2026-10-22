@@ -11,7 +11,7 @@ import {
 const apiBaseUrl = import.meta.env.VITE_MODEL_API_BASE_URL ?? ""
 const defaultModelId =
   new URLSearchParams(window.location.search).get("model") ??
-  "hatteras-63-motor-yacht-prototype"
+  "hatteras-63-motor-yacht-v2"
 
 type VisibilityMode = "all" | "isolated"
 type CapabilityKind = "camera.thermal" | "audio.speaker" | "sensor.water"

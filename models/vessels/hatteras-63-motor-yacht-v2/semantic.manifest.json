@@ -1,0 +1,108 @@
+{
+  "modelId": "hatteras-63-motor-yacht-v2",
+  "modelKind": "vessel",
+  "modelProfile": "vessel",
+  "modelVersion": "2.0.0",
+  "subject": {
+    "subjectId": "vessel-model:hatteras-63-motor-yacht",
+    "subjectKind": "vessel-model"
+  },
+  "artifact": {
+    "artifactId": "hatteras-63-motor-yacht-full-v2",
+    "artifactVersion": "2.0.0",
+    "fileName": "hatteras-full-v2.glb",
+    "contentFingerprint": "sha256:6b27fd79f4a3c01f569e1682d5a7fb1c9374bee0d6b1a4e62b87681776d4eeaf"
+  },
+  "generator": {
+    "name": "Khronos glTF Blender I/O",
+    "version": "5.0.21",
+    "sourceRevision": "hatteras-full-v2"
+  },
+  "sourceReferences": [
+    {
+      "referenceId": "hatteras-full-v2-blend",
+      "kind": "reference-mesh",
+      "title": "Externally authored full-vessel Hatteras source",
+      "locator": "sources/hatteras-full-v2.blend",
+      "acquiredAt": "2026-10-22T15:45:29.615Z",
+      "role": "Authored full-vessel source"
+    }
+  ],
+  "coordinateFrame": "right-handed-y-up",
+  "placementCoordinateFrame": "model",
+  "units": "unverified-blender-units",
+  "createdAt": "2026-10-22T15:45:29.615Z",
+  "generatedAt": "2026-10-22T15:45:29.615Z",
+  "exportedAt": "2026-10-22T15:45:29.615Z",
+  "validatedAt": "2026-10-22T15:45:29.615Z",
+  "semanticNodes": [
+    {
+      "semanticId": "vessel.hatteras-63",
+      "semanticKind": "vessel",
+      "semanticRole": "motor-yacht",
+      "displayName": "Hatteras 63 Motor Yacht (Current)",
+      "representation": {
+        "glbNodes": [
+          "hull"
+        ]
+      },
+      "interactionCapabilities": [
+        "selectable",
+        "highlightable",
+        "isolatable"
+      ]
+    },
+    {
+      "semanticId": "vessel.level.main-deck",
+      "semanticKind": "level",
+      "semanticRole": "main-deck",
+      "displayName": "Main Deck",
+      "parentSemanticId": "vessel.hatteras-63",
+      "representation": {
+        "glbNodes": [
+          "Deck"
+        ]
+      },
+      "interactionCapabilities": [
+        "selectable",
+        "highlightable",
+        "isolatable"
+      ]
+    },
+    {
+      "semanticId": "vessel.area.salon",
+      "semanticKind": "area",
+      "semanticRole": "vessel-area",
+      "displayName": "Salon",
+      "parentSemanticId": "vessel.level.main-deck",
+      "representation": {
+        "glbNodes": [
+          "Saloon"
+        ]
+      },
+      "interactionCapabilities": [
+        "selectable",
+        "highlightable",
+        "isolatable"
+      ]
+    },
+    {
+      "semanticId": "vessel.area.flybridge",
+      "semanticKind": "area",
+      "semanticRole": "vessel-area",
+      "displayName": "Flybridge",
+      "parentSemanticId": "vessel.level.main-deck",
+      "representation": {
+        "glbNodes": [
+          "flybridge"
+        ]
+      },
+      "interactionCapabilities": [
+        "selectable",
+        "highlightable",
+        "isolatable"
+      ]
+    }
+  ],
+  "modelReferences": []
+}
