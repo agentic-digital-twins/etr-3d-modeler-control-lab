@@ -54,6 +54,16 @@ const modelSources = [
   {
     manifestPath: resolve(
       repositoryRoot,
+      "models/vessels/offshore-center-console-v2/semantic.manifest.json",
+    ),
+    artifactPath: resolve(
+      repositoryRoot,
+      "models/vessels/offshore-center-console-v2/geometry/center-console-viewer-v1.glb",
+    ),
+  },
+  {
+    manifestPath: resolve(
+      repositoryRoot,
       "fixtures/spatial-models/convertible-sportfish.manifest.json",
     ),
     artifactPath: resolve(

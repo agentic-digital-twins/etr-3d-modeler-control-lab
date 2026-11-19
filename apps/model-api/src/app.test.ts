@@ -1,3 +1,5 @@
+import { createHash } from "node:crypto"
+
 import request from "supertest"
 import { describe, expect, it } from "vitest"
 
@@ -26,7 +28,7 @@ describe("model API", () => {
       (model: { modelId: string }) => model.modelId === "tri-deck-superyacht",
     )
 
-    expect(catalog.body).toHaveLength(6)
+    expect(catalog.body).toHaveLength(7)
     expect(currentHatteras).toMatchObject({
       displayName: "Hatteras 63 Motor Yacht (Current)",
       modelKind: "vessel",
@@ -84,5 +86,33 @@ describe("model API", () => {
     await request(app).get("/api/models/not-a-model").expect(404, {
       error: "model_not_found",
     })
+  })
+
+  it("serves the authored Center Console and its registered viewer GLB", async () => {
+    const app = await createApp()
+    const catalog = await request(app).get("/api/models").expect(200)
+    expect(catalog.body).toContainEqual({
+      modelId: "offshore-center-console-v2",
+      displayName: "Offshore Center Console (Authored)",
+      modelKind: "vessel",
+      modelVersion: "2.0.0",
+    })
+
+    const path = "/api/models/offshore-center-console-v2"
+    const manifest = await request(app).get(`${path}/manifest`).expect(200)
+    const artifact = await request(app)
+      .get(`${path}/artifact`)
+      .expect("Content-Type", "model/gltf-binary")
+      .buffer(true)
+      .parse((response, callback) => {
+        const chunks: Buffer[] = []
+        response.on("data", (chunk: Buffer) => chunks.push(chunk))
+        response.on("error", callback)
+        response.on("end", () => callback(null, Buffer.concat(chunks)))
+      })
+      .expect(200)
+    expect(manifest.body.artifact.fileName).toBe("center-console-viewer-v1.glb")
+    const hash = createHash("sha256").update(artifact.body).digest("hex")
+    expect(`sha256:${hash}`).toBe(manifest.body.artifact.contentFingerprint)
   })
 })

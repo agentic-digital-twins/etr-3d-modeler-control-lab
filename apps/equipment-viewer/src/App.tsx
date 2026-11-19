@@ -73,6 +73,22 @@ function CapabilityMarker({
   )
 }
 
+export function findBoundSemanticNode(
+  object: Object3D,
+  semanticNodes: SpatialModelManifest["semanticNodes"],
+) {
+  for (let node: Object3D | null = object; node; node = node.parent) {
+    // GLTFLoader preserves the original name even when it sanitizes Object3D.name.
+    const name = typeof node.userData.name === "string"
+      ? node.userData.name
+      : node.name
+    const match = semanticNodes.find((candidate) =>
+      candidate.representation.glbNodes.includes(name),
+    )
+    if (match) return match
+  }
+}
+
 function Model({
   manifest,
   selectedSemanticId,
@@ -106,18 +122,26 @@ function Model({
   }, [scene])
 
   useEffect(() => {
+    const visibleAncestors = new Set<Object3D>()
     scene.traverse((node: Object3D) => {
-      const semanticNode = manifest.semanticNodes.find((candidate) =>
-        candidate.representation.glbNodes.includes(node.name),
-      )
-      const isSelectedLevel = semanticNode?.semanticId === activeLevelId
-      const isSelectedArea = semanticNode?.semanticId === activeAreaId
+      const semanticNode = findBoundSemanticNode(node, manifest.semanticNodes)
+      const isSelectedLevel = activeLevelId !== undefined &&
+        semanticNode?.semanticId === activeLevelId
+      const isSelectedArea = activeAreaId !== undefined &&
+        semanticNode?.semanticId === activeAreaId
       const isAreaInSelectedLevel =
+        activeLevelId !== undefined &&
         semanticNode?.semanticKind === "area" &&
         semanticNode.parentSemanticId === activeLevelId
       const isInSelectionScope =
         isSelectedLevel || isSelectedArea || isAreaInSelectedLevel
       node.visible = visibilityMode === "all" || isInSelectionScope
+      if (visibilityMode === "isolated" && node.visible) {
+        for (let parent = node.parent; parent; parent = parent.parent) {
+          visibleAncestors.add(parent)
+          if (parent === scene) break
+        }
+      }
       if (
         node instanceof Mesh &&
         node.material instanceof MeshStandardMaterial
@@ -134,6 +158,7 @@ function Model({
         }
       }
     })
+    for (const node of visibleAncestors) node.visible = true
   }, [
     activeAreaId,
     activeLevelId,
@@ -151,8 +176,9 @@ function Model({
       object={scene}
       onClick={(event: ThreeEvent<MouseEvent>) => {
         event.stopPropagation()
-        const semanticNode = manifest.semanticNodes.find((candidate) =>
-          candidate.representation.glbNodes.includes(event.object.name),
+        const semanticNode = findBoundSemanticNode(
+          event.object,
+          manifest.semanticNodes,
         )
         if (semanticNode) {
           onSelect(semanticNode.semanticId)

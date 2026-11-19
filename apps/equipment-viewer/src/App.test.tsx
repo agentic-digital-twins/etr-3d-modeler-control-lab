@@ -1,7 +1,30 @@
 import { fireEvent, render, screen } from "@testing-library/react"
+import { Group, Mesh } from "three"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
-import { App } from "./App"
+import { App, findBoundSemanticNode } from "./App"
+
+it("resolves a primitive to its GLB group even when the loader sanitizes the group name", () => {
+  const scene = new Group()
+  const group = new Group()
+  group.name = "HelmSeatingLeaningPost"
+  group.userData.name = "HelmSeating/LeaningPost"
+  const primitive = new Mesh()
+  const unboundMesh = new Mesh()
+  scene.add(group, unboundMesh)
+  group.add(primitive)
+
+  const helm = {
+    semanticId: "vessel.area.helm",
+    semanticKind: "area",
+    semanticRole: "vessel-area",
+    displayName: "Helm",
+    representation: { glbNodes: ["HelmSeating/LeaningPost"] },
+    interactionCapabilities: [],
+  }
+  expect(findBoundSemanticNode(primitive, [helm])).toBe(helm)
+  expect(findBoundSemanticNode(unboundMesh, [helm])).toBeUndefined()
+})
 
 vi.mock("@react-three/fiber", () => ({
   Canvas: () => <div data-testid="mock-canvas" />,
