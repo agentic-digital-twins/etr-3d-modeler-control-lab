@@ -1,0 +1,111 @@
+{
+  "modelId": "offshore-center-console-v2",
+  "modelKind": "vessel",
+  "modelProfile": "vessel",
+  "modelVersion": "2.0.0",
+  "subject": {
+    "subjectId": "vessel-model:offshore-center-console",
+    "subjectKind": "vessel-model"
+  },
+  "artifact": {
+    "artifactId": "offshore-center-console-viewer-v1",
+    "artifactVersion": "1.0.0",
+    "fileName": "center-console-viewer-v1.glb",
+    "contentFingerprint": "sha256:a7aaa9929eed2c44d17328ff75186dd3cff739ad39969c320ba1c60953f415e6"
+  },
+  "generator": {
+    "name": "Khronos glTF Blender I/O",
+    "version": "5.2.39",
+    "sourceRevision": "center-console.glb@sha256:8a52d9c76b4a87c10a34d18c9a1539aeb7d5e258f7806e4352e4af99b9cc619b"
+  },
+  "sourceReferences": [
+    {
+      "referenceId": "center-console-blend",
+      "kind": "reference-mesh",
+      "title": "Authored Center Console Blender source",
+      "locator": "sources/center-console.blend",
+      "acquiredAt": "2026-11-19T15:52:06.471Z",
+      "role": "Authored source of record"
+    },
+    {
+      "referenceId": "center-console-delivered-glb",
+      "kind": "reference-mesh",
+      "title": "Delivered Draco-compressed Center Console GLB",
+      "locator": "geometry/center-console.glb",
+      "acquiredAt": "2026-11-19T15:52:06.471Z",
+      "role": "Input to the uncompressed viewer export"
+    }
+  ],
+  "coordinateFrame": "right-handed-y-up",
+  "placementCoordinateFrame": "model",
+  "units": "unverified-glb-units",
+  "createdAt": "2026-11-19T15:56:19Z",
+  "generatedAt": "2026-11-19T15:56:20Z",
+  "exportedAt": "2026-11-19T15:56:21.119Z",
+  "validatedAt": "2026-11-19T15:56:58.801Z",
+  "semanticNodes": [
+    {
+      "semanticId": "vessel.offshore-center-console",
+      "semanticKind": "vessel",
+      "semanticRole": "offshore-center-console",
+      "displayName": "Offshore Center Console (Authored)",
+      "representation": { "glbNodes": ["Hull"] },
+      "interactionCapabilities": ["selectable"]
+    },
+    {
+      "semanticId": "vessel.level.main-deck",
+      "semanticKind": "level",
+      "semanticRole": "main-deck",
+      "displayName": "Main Deck",
+      "parentSemanticId": "vessel.offshore-center-console",
+      "representation": { "glbNodes": ["BowDeck", "CockpitDeck"] },
+      "interactionCapabilities": ["selectable", "highlightable", "isolatable"]
+    },
+    {
+      "semanticId": "vessel.area.bow-seating",
+      "semanticKind": "area",
+      "semanticRole": "vessel-area",
+      "displayName": "Bow Seating",
+      "parentSemanticId": "vessel.level.main-deck",
+      "representation": { "glbNodes": ["BowSeating"] },
+      "interactionCapabilities": ["selectable", "highlightable", "isolatable"]
+    },
+    {
+      "semanticId": "vessel.area.helm",
+      "semanticKind": "area",
+      "semanticRole": "vessel-area",
+      "displayName": "Helm",
+      "parentSemanticId": "vessel.level.main-deck",
+      "representation": { "glbNodes": ["CentreConsole", "Helm", "HelmSeating/LeaningPost"] },
+      "interactionCapabilities": ["selectable", "highlightable", "isolatable"]
+    },
+    {
+      "semanticId": "vessel.area.t-top",
+      "semanticKind": "area",
+      "semanticRole": "vessel-area",
+      "displayName": "T-Top",
+      "parentSemanticId": "vessel.level.main-deck",
+      "representation": { "glbNodes": ["TTOP"] },
+      "interactionCapabilities": ["selectable", "highlightable", "isolatable"]
+    },
+    {
+      "semanticId": "vessel.area.aft-seating",
+      "semanticKind": "area",
+      "semanticRole": "vessel-area",
+      "displayName": "Aft Seating",
+      "parentSemanticId": "vessel.level.main-deck",
+      "representation": { "glbNodes": ["AftSeating"] },
+      "interactionCapabilities": ["selectable", "highlightable", "isolatable"]
+    },
+    {
+      "semanticId": "vessel.area.transom-platform",
+      "semanticKind": "area",
+      "semanticRole": "vessel-area",
+      "displayName": "Transom Platform",
+      "parentSemanticId": "vessel.level.main-deck",
+      "representation": { "glbNodes": ["TransomPlatform"] },
+      "interactionCapabilities": ["selectable", "highlightable", "isolatable"]
+    }
+  ],
+  "modelReferences": []
+}
